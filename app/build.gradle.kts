@@ -1,8 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.google.gms.google.services)
 }
+
 
 android {
     namespace = "com.example.tictactoe"
@@ -10,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.tictactoe"
-        minSdk = 27
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -60,6 +61,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.database)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -67,7 +69,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    //firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
 }

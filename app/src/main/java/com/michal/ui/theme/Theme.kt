@@ -1,4 +1,4 @@
-package com.example.tictactoe.ui.theme
+package com.michal.tictactoeonline.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -34,7 +34,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun TicTacToeTheme(
+fun TicTacToeOnlineTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

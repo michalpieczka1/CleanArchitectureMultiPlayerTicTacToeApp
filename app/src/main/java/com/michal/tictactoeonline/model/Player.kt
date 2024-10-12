@@ -1,7 +1,6 @@
-package com.example.tictactoe.feature_tic_tac_toe.domain.model
+package com.michal.tictactoeonline.data.model
 
 data class Player(
     val username: String = "",
     val uid: String = "",
 )
-
