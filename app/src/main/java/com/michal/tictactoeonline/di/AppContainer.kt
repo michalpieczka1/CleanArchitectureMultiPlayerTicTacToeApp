@@ -1,6 +1,6 @@
 package com.michal.tictactoeonline.di
 
-import com.michal.tictactoeonline.TicTacToeRepository
+import com.michal.tictactoeonline.data.TicTacToeRepository
 
 
 class AppContainer() {

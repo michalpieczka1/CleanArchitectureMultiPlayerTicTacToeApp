@@ -5,22 +5,26 @@ import com.google.firebase.database.IgnoreExtraProperties
 
 @IgnoreExtraProperties
 data class Session(
-    val sessionId:Long? = 0,
+    val sessionName:String? = "",
+    val sessionPassword:String? = "",
     val player1:Player = Player(),
     val player2: Player? = null,
     val playerCount:Int? = 1,
-    val isWin:Boolean? = false,
+    val isWin:Boolean? = null,
+    val isTie:Boolean? = null,
     val currentTurn: String? = null,
     val board: List<Int?> = List(9) {null},
 ){
     @Exclude
     fun toMap(): Map<String, Any?>{
         return mapOf(
-            "sessionId" to sessionId,
+            "sessionName" to sessionName,
+            "sessionPassword" to sessionPassword,
             "player1" to player1,
             "player2" to player2,
             "playerCount" to playerCount,
             "isWin" to isWin,
+            "isTie" to isTie,
             "currentTurn" to currentTurn,
             "board" to board
         )

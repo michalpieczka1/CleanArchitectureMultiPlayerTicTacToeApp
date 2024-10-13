@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.michal.tictactoeonline.data.TicTacToeRepository
 import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.data.model.Session
 import com.michal.tictactoeonline.di.MyApplication
@@ -63,8 +65,16 @@ fun Greeting(
         mutableStateOf("")
     }
     var sesja by remember {
-        mutableStateOf<Session?>(Session())
+        mutableStateOf<Session?>(null)
     }
+    LaunchedEffect(key1 = idSesji) {
+        if(idSesji.isNotEmpty()) {
+            ticTacToeRepository.getSessionById(idSesji).collect { sessionData ->
+                sesja = sessionData
+            }
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -75,8 +85,10 @@ fun Greeting(
                     val wynik = ticTacToeRepository.createSession(
                         player1 = Player(
                             "Michal11",
+                            "test",
                             "32422S55E235"
-                        )
+                        ),
+                        sessionName = "sesja_testowa"
                     )
                         .filter { it is Resource.Success }  // Filtrujemy tylko wynik sukcesu
                         .first()
@@ -88,7 +100,6 @@ fun Greeting(
 
             Button(onClick = {
                 coroutineScope.launch {
-                    sesja = ticTacToeRepository.getSessionById(idSesji.toLong()).first()
                     val wynik = ticTacToeRepository.removeSession(sesja)
                         .filter { it is Resource.Success }
                         .first()
@@ -105,13 +116,6 @@ fun Greeting(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "Wpisz id sesji")
             TextField(value = idSesji, onValueChange = { idSesji = it })
-            Button(onClick = {
-                coroutineScope.launch {
-                    sesja = ticTacToeRepository.getSessionById(idSesji.toLong()).first()
-                }
-            }) {
-                Text(text = "Wyswietl dane")
-            }
                 Text(text = "Dane sesji:")
                 sesja?.toMap()?.forEach {
                     Text(text = "${it.key} : ${it.value}")
