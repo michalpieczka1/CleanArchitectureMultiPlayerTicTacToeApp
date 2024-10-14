@@ -13,7 +13,7 @@ data class Session(
     val isWin:Boolean? = null,
     val isTie:Boolean? = null,
     val currentTurn: String? = null,
-    val board: List<Int?> = List(9) {null},
+    val board: List<String?> = List(9) {null},
 ){
     @Exclude
     fun toMap(): Map<String, Any?>{

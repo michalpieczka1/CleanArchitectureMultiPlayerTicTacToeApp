@@ -61,15 +61,15 @@ fun Greeting(
     ticTacToeRepository: TicTacToeRepository
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var idSesji by remember {
+    var kluczSesji by remember {
         mutableStateOf("")
     }
     var sesja by remember {
         mutableStateOf<Session?>(null)
     }
-    LaunchedEffect(key1 = idSesji) {
-        if(idSesji.isNotEmpty()) {
-            ticTacToeRepository.getSessionById(idSesji).collect { sessionData ->
+    LaunchedEffect(key1 = kluczSesji) {
+        if(kluczSesji.isNotEmpty()) {
+            ticTacToeRepository.getSessionByKey(kluczSesji).collect { sessionData ->
                 sesja = sessionData
             }
         }
@@ -115,7 +115,7 @@ fun Greeting(
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "Wpisz id sesji")
-            TextField(value = idSesji, onValueChange = { idSesji = it })
+            TextField(value = kluczSesji, onValueChange = { kluczSesji = it })
                 Text(text = "Dane sesji:")
                 sesja?.toMap()?.forEach {
                     Text(text = "${it.key} : ${it.value}")
