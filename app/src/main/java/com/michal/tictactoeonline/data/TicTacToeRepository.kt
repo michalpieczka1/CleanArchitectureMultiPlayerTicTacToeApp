@@ -27,39 +27,98 @@ class TicTacToeRepository(
 //
 
 
-    fun getSessionByKey(sessionKey: String): Flow<Session?> = callbackFlow {
-        val sessionRef = firebaseDatabase.getReference()
-            .child(SESSIONS_PATH)
-            .child(sessionKey)
+    fun getAllPublicSessions(): Flow<Resource<List<Session>>> = callbackFlow {
+        trySend(Resource.Loading())
 
-        sessionRef.addValueEventListener(object : ValueEventListener {
+        val sessionRef = firebaseDatabase.reference.child(SESSIONS_PATH)
+        sessionRef.addValueEventListener(object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
-                trySend(snapshot.getValue<Session?>())
+                val session = snapshot.getValue<List<Session>>()
+                if(session != null){
+                    trySend(Resource.Success(session)).isSuccess
+                    close()
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.i("test", error.message)
+                trySend(Resource.Error(error.message)).isFailure
+                close()
             }
 
         })
         awaitClose()
     }
 
-//    fun getSessionByName(sessionName: String): Flow<Session?> = callbackFlow {
-//        trySend(Resource.Loading())
-//
-//
-//    }
+    fun getSessionByKey(sessionKey: String): Flow<Resource<Session>> = callbackFlow {
+        trySend(Resource.Loading())
 
-    fun createSession(player1: Player, sessionName: String): Flow<Resource<Map<String, Session>>> =
+        val sessionRef = firebaseDatabase.reference
+            .child(SESSIONS_PATH)
+            .child(sessionKey)
+
+        sessionRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val session = snapshot.getValue<Session>()
+
+                if(session == null){
+                    trySend(Resource.Error("Getting session returned null")).isFailure
+                    close()
+                    return
+                }
+
+                trySend(Resource.Success(session))
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                trySend(Resource.Error(error.message))
+            }
+
+        })
+        awaitClose()
+    }
+
+    fun getSessionByNameAndPassword(sessionName: String,password: String?): Flow<Resource<Session>> = callbackFlow {
+        val sessionRef = firebaseDatabase.reference
+            .child(SESSIONS_PATH).orderByChild("sessionName").equalTo(sessionName).limitToFirst(1)
+
+        sessionRef.addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val session = snapshot.getValue<Session>()
+
+                if(session == null){
+                    trySend(Resource.Error("Getting session returned null")).isFailure
+                    close()
+                    return
+                }
+                if((password ?: "") != session.sessionPassword){
+                    trySend(Resource.Error("Provided password is wrong")).isFailure
+                    close()
+                }
+
+                trySend(Resource.Success(session)).isSuccess
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                trySend(Resource.Error(error.message)).isFailure
+            }
+
+        })
+
+        awaitClose()
+    }
+
+    fun createSession(player1: Player, sessionName: String, password:String?, isPrivate: Boolean): Flow<Resource<Map<String, Session>>> =
         callbackFlow {
             trySend(Resource.Loading())
 
-            val sessionRef = firebaseDatabase.reference.child(SESSIONS_PATH).push()
+            val sessionRef = firebaseDatabase.reference
+                .child(SESSIONS_PATH).push()
             val sessionKey = sessionRef.key
 
             val session = Session(
                 sessionName = sessionName,
+                sessionPassword = password ?: "",
+                isPrivate = isPrivate,
                 player1 = player1,
                 playerCount = 1,
                 currentTurn = player1.uid
@@ -99,28 +158,26 @@ class TicTacToeRepository(
             }
             .addOnFailureListener {
                 trySend(Resource.Error(it.message ?: "Unknown error occurred"))
+                close()
             }
         awaitClose()
     }
 
 
-    fun updateBoard(sessionKey: String, board: List<String>): Flow<Resource<Session?>> = callbackFlow {
+    fun updateBoard(sessionKey: String, board: List<String>): Flow<Resource<String>> = callbackFlow {
         trySend(Resource.Loading())
 
         val firebaseRef = firebaseDatabase.reference.child(SESSIONS_PATH).child(sessionKey)
 
         try {
             firebaseRef.updateChildren(mapOf("board" to board)).await()
-            val session = getSessionByKey(sessionKey).first()
-
-            if(session == null){
-                trySend(Resource.Error("Session that you got is null"))
-                return@callbackFlow
-            }
-            trySend(Resource.Success(session)).isSuccess
+            Resource.Success("Board updated")
+            close()
         }catch(e:Exception){
             trySend(Resource.Error(e.message ?: "Unknown error occurred")).isFailure
+            close()
         }
+        awaitClose()
     }
 
 //

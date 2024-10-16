@@ -28,106 +28,41 @@ import com.michal.tictactoeonline.data.TicTacToeRepository
 import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.data.model.Session
 import com.michal.tictactoeonline.di.MyApplication
-import com.michal.tictactoeonline.ui.theme.TicTacToeOnlineTheme
+import com.michal.tictactoeonline.presentation.CardTemplatePreview
+import com.michal.tictactoeonline.presentation.main.MainScreen
+import com.michal.tictactoeonline.presentation.register.RegisterScreen
+import com.michal.tictactoeonline.presentation.register.RegisterViewModel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.michal.tictactoeonline.util.Resource
+import com.michal.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TicTacToeOnlineTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding),
-                        (application as MyApplication).appContainer.ticTacToeRepository
+            AppTheme {
+                    MainScreen(
+                        onLogOut = { /*TODO*/ },
+                        onPlayerVsPc = { /*TODO*/ },
+                        onCreateSession = { /*TODO*/ },
+                        onJoinSession = { /*TODO*/ },
+                        onPublicSessions = { },
+                        player = Player("Nostii"),
+                        modifier = Modifier.fillMaxSize()
                     )
-
-                }
             }
         }
     }
 }
 
-@SuppressLint("CoroutineCreationDuringComposition")
-@Composable
-fun Greeting(
-    name: String,
-    modifier: Modifier = Modifier,
-    ticTacToeRepository: TicTacToeRepository
-) {
-    val coroutineScope = rememberCoroutineScope()
-    var kluczSesji by remember {
-        mutableStateOf("")
-    }
-    var sesja by remember {
-        mutableStateOf<Session?>(null)
-    }
-    LaunchedEffect(key1 = kluczSesji) {
-        if(kluczSesji.isNotEmpty()) {
-            ticTacToeRepository.getSessionByKey(kluczSesji).collect { sessionData ->
-                sesja = sessionData
-            }
-        }
-    }
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row{
-            Button(onClick = {
-                coroutineScope.launch {
-                    val wynik = ticTacToeRepository.createSession(
-                        player1 = Player(
-                            "Michal11",
-                            "test",
-                            "32422S55E235"
-                        ),
-                        sessionName = "sesja_testowa"
-                    )
-                        .filter { it is Resource.Success }  // Filtrujemy tylko wynik sukcesu
-                        .first()
-                    Log.i("test", "${wynik.data}")
-                }
-            }) {
-                Text(text = "Dodaj")
-            }
-
-            Button(onClick = {
-                coroutineScope.launch {
-                    val wynik = ticTacToeRepository.removeSession(sesja)
-                        .filter { it is Resource.Success }
-                        .first()
-
-                    Log.i("test", "${wynik.data}")
-                    Log.i("test", "$sesja")
-                }
-            }) {
-                Text(text = "Usuń")
-            }
-
-
-        }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Wpisz id sesji")
-            TextField(value = kluczSesji, onValueChange = { kluczSesji = it })
-                Text(text = "Dane sesji:")
-                sesja?.toMap()?.forEach {
-                    Text(text = "${it.key} : ${it.value}")
-                }
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    TicTacToeOnlineTheme {
+fun TicTacToeScreenPreview() {
+    AppTheme {
 
     }
 }

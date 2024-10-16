@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">TicTacToe</string>
+    <string name="public_lobby_list">Public lobby list</string>
+    <string name="join_lobby">Join lobby</string>
+    <string name="create_session">Create Session</string>
+    <string name="play_vs_pc">Play Vs PC</string>
 </resources>
