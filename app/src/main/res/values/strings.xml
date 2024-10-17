@@ -4,4 +4,5 @@
     <string name="join_lobby">Join lobby</string>
     <string name="create_session">Create Session</string>
     <string name="play_vs_pc">Play Vs PC</string>
+    <string name="welcome_to_tic_tac_toe_online">Welcome to Tic Tac Toe Online!</string>
 </resources>

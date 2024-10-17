@@ -4,4 +4,5 @@ data class Player(
     val username: String = "",
     val password: String? = null,
     val uid: String = "",
+    val symbol: String? = "X"
 )

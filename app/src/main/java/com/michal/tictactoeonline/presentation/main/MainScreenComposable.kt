@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.tictactoe.R
 import com.michal.tictactoeonline.data.model.Player
@@ -61,6 +62,14 @@ fun MainScreen(
             modifier = modifier,
             contentAlignment = Alignment.Center
             ){
+            Text(
+                text = stringResource(R.string.welcome_to_tic_tac_toe_online),
+                fontStyle = MaterialTheme.typography.titleLarge.fontStyle,
+                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(32.dp))
             Card(
                 modifier = Modifier.padding(top = topPadding, start = 16.dp, end = 16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
