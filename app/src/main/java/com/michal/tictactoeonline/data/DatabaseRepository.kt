@@ -15,35 +15,33 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class DatabaseRepository(
-) {
-    private var firebaseDatabase = FirebaseDatabase.getInstance()
-//    fun getAllSessions(): Flow<List<Session>> {
-//    }
-//
-//
-//
-
+    private var firebaseDatabase:FirebaseDatabase
+){
 
     fun getAllPublicSessions(): Flow<Resource<List<Session>>> = callbackFlow {
         trySend(Resource.Loading())
 
         val sessionRef = firebaseDatabase.reference.child(SESSIONS_PATH)
-        sessionRef.addValueEventListener(object: ValueEventListener{
+        val listener = (object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
-                val session = snapshot.getValue<List<Session>>()
-                if(session != null){
-                    trySend(Resource.Success(session)).isSuccess
-                    close()
+                val sessionList = mutableListOf<Session?>()
+                for(childSnapshot in snapshot.children){
+                    sessionList.add(childSnapshot.getValue<Session?>())
                 }
+                    trySend(Resource.Success(sessionList.filterNotNull().toList())).isSuccess
+                println("cos sie zmienloo ${sessionList.filterNotNull().toList()}")
             }
 
             override fun onCancelled(error: DatabaseError) {
                 trySend(Resource.Error(error.message)).isFailure
-                close()
             }
 
         })
-        awaitClose()
+        sessionRef.addValueEventListener(listener)
+
+        awaitClose{
+            sessionRef.removeEventListener(listener)
+        }
     }
 
     fun getSessionByKey(sessionKey: String): Flow<Resource<Session>> = callbackFlow {
@@ -53,7 +51,7 @@ class DatabaseRepository(
             .child(SESSIONS_PATH)
             .child(sessionKey)
 
-        sessionRef.addValueEventListener(object : ValueEventListener {
+        val listener = (object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val session = snapshot.getValue<Session>()
 
@@ -68,17 +66,21 @@ class DatabaseRepository(
 
             override fun onCancelled(error: DatabaseError) {
                 trySend(Resource.Error(error.message))
+                close()
             }
 
         })
-        awaitClose()
+        sessionRef.addValueEventListener(listener)
+        awaitClose{
+            sessionRef.removeEventListener(listener)
+        }
     }
 
     fun getSessionByNameAndPassword(sessionName: String,password: String?): Flow<Resource<Session>> = callbackFlow {
         val sessionRef = firebaseDatabase.reference
             .child(SESSIONS_PATH).orderByChild("sessionName").equalTo(sessionName).limitToFirst(1)
 
-        sessionRef.addValueEventListener(object : ValueEventListener{
+        val listener = (object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 val session = snapshot.getValue<Session>()
 
@@ -97,11 +99,14 @@ class DatabaseRepository(
 
             override fun onCancelled(error: DatabaseError) {
                 trySend(Resource.Error(error.message)).isFailure
+                close()
             }
 
         })
-
-        awaitClose()
+        sessionRef.addValueEventListener(listener)
+        awaitClose{
+            sessionRef.removeEventListener(listener)
+        }
     }
 
     fun createSession(player1: Player, sessionName: String, password:String?, isPrivate: Boolean): Flow<Resource<Map<String, Session>>> =

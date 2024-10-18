@@ -14,6 +14,7 @@ firebaseDatabase = "21.0.0"
 composeNavigation = "2.8.3"
 serialization = "1.6.0"
 uiTextGoogleFonts = "1.7.3"
+konfetti-compose = "2.0.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,6 +35,7 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
+compose-konfetti = { group="nl.dionsegijn", name="konfetti-compose", version.ref = "konfetti-compose"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

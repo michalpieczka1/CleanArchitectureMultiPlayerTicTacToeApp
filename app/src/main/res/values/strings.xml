@@ -5,4 +5,7 @@
     <string name="create_session">Create Session</string>
     <string name="play_vs_pc">Play Vs PC</string>
     <string name="welcome_to_tic_tac_toe_online">Welcome to Tic Tac Toe Online!</string>
+    <string name="is_the_winner">%1$s is the winner!</string>
+    <string name="it_s_a_tie">It\'s a tie!</string>
+    <string name="someone_turn">%1$s turn!</string>
 </resources>
