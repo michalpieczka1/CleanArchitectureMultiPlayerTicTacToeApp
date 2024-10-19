@@ -7,13 +7,13 @@ import com.google.firebase.database.IgnoreExtraProperties
 data class Session(
     val sessionName:String = "",
     val sessionPassword:String = "",
-    val currentTurn: String? = "",
+    val currentTurn: Player = Player(),
     val player1:Player = Player(),
     val player2: Player? = null,
     val playerCount:Int = 1,
     val isWin:Boolean? = null,
+    val winner:Player? = null,
     val isTie:Boolean? = null,
-    val isPrivate:Boolean = false,
     val board: List<String> = List(9) {""},
 ){
     @Exclude
@@ -27,7 +27,6 @@ data class Session(
             "playerCount" to playerCount,
             "isWin" to isWin,
             "isTie" to isTie,
-            "isPrivate" to isPrivate,
             "board" to board
         )
     }

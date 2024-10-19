@@ -18,7 +18,7 @@ class DatabaseRepository(
     private var firebaseDatabase:FirebaseDatabase
 ){
 
-    fun getAllPublicSessions(): Flow<Resource<List<Session>>> = callbackFlow {
+    fun getAllSessions(): Flow<Resource<List<Session>>> = callbackFlow {
         trySend(Resource.Loading())
 
         val sessionRef = firebaseDatabase.reference.child(SESSIONS_PATH)
@@ -75,26 +75,21 @@ class DatabaseRepository(
             sessionRef.removeEventListener(listener)
         }
     }
-
-    fun getSessionByNameAndPassword(sessionName: String,password: String?): Flow<Resource<Session>> = callbackFlow {
+    fun getSessionKeyByNameAndPassword(sessionName: String,password: String?): Flow<Resource<String>> = callbackFlow {
         val sessionRef = firebaseDatabase.reference
             .child(SESSIONS_PATH).orderByChild("sessionName").equalTo(sessionName).limitToFirst(1)
 
         val listener = (object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
-                val session = snapshot.getValue<Session>()
+                val sessionKey = snapshot.key
 
-                if(session == null){
+                if(sessionKey == null){
                     trySend(Resource.Error("Getting session returned null")).isFailure
                     close()
                     return
                 }
-                if((password ?: "") != session.sessionPassword){
-                    trySend(Resource.Error("Provided password is wrong")).isFailure
-                    close()
-                }
 
-                trySend(Resource.Success(session)).isSuccess
+                trySend(Resource.Success(sessionKey)).isSuccess
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -109,7 +104,8 @@ class DatabaseRepository(
         }
     }
 
-    fun createSession(player1: Player, sessionName: String, password:String?, isPrivate: Boolean): Flow<Resource<Map<String, Session>>> =
+    //TODO check if there are already sessions with the same name
+    fun createSession(player1: Player, sessionName: String, password:String?): Flow<Resource<Map<String, Session>>> =
         callbackFlow {
             trySend(Resource.Loading())
 
@@ -120,10 +116,9 @@ class DatabaseRepository(
             val session = Session(
                 sessionName = sessionName,
                 sessionPassword = password ?: "",
-                isPrivate = isPrivate,
                 player1 = player1,
                 playerCount = 1,
-                currentTurn = player1.uid
+                currentTurn = player1
             )
 
             if (sessionKey == null) {
@@ -166,15 +161,14 @@ class DatabaseRepository(
     }
 
 
-    fun updateBoard(sessionKey: String, board: List<String>): Flow<Resource<String>> = callbackFlow {
+    fun updateSession(sessionKey: String, session: Session): Flow<Resource<String?>> = callbackFlow {
         trySend(Resource.Loading())
 
         val firebaseRef = firebaseDatabase.reference.child(SESSIONS_PATH).child(sessionKey)
 
         try {
-            firebaseRef.updateChildren(mapOf("board" to board)).await()
-            Resource.Success("Board updated")
-            close()
+            firebaseRef.updateChildren(session.toMap()).await()
+            trySend(Resource.Success(null)).isSuccess
         }catch(e:Exception){
             trySend(Resource.Error(e.message ?: "Unknown error occurred")).isFailure
             close()

@@ -1,4 +1,4 @@
-package com.michal.tictactoeonline.presentation.vsPc
+package com.michal.tictactoeonline.presentation.onlineGame
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -35,17 +35,18 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun LocalGameComposable(
+fun OnlineGameComposable(
     player: Player,
+    sessionKey: String,
     modifier: Modifier = Modifier,
-    localGameViewModel: LocalGameViewModel = viewModel(
-        factory = LocalGameViewModel.provideFactory(player)
+    onlineGameViewModel: OnlineGameViewModel = viewModel(
+        factory = OnlineGameViewModel.provideFactory(player,sessionKey)
     ),
 ) {
-    val state = localGameViewModel.uiState.collectAsState()
+    val state = onlineGameViewModel.sessionState.collectAsState()
     Surface(modifier = modifier.fillMaxSize()) {
 
-        if (state.value.isWin == true) {
+        if (state.value.session.isWin == true) {
             Box(modifier = Modifier.fillMaxSize()) {
                 KonfettiView(
                     parties = listOf(
@@ -64,12 +65,12 @@ fun LocalGameComposable(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            val displayedText = if (state.value.isWin == true) {
-                stringResource(R.string.is_the_winner, state.value.currentTurn.username)
-            } else if (state.value.isTie == true) {
+            val displayedText = if (state.value.session.isWin == true) {
+                stringResource(R.string.is_the_winner, state.value.session.currentTurn.username)
+            } else if (state.value.session.isTie == true) {
                 stringResource(R.string.it_s_a_tie)
             } else {
-                stringResource(R.string.someone_turn, state.value.currentTurn.username)
+                stringResource(R.string.someone_turn, state.value.session.currentTurn.username)
             }
 
             Text(
@@ -82,16 +83,16 @@ fun LocalGameComposable(
                 FlowRow(
                     maxItemsInEachRow = 3
                 ) {
-                    state.value.board.indices.forEach {
+                    state.value.session.board.indices.forEach {
                         Button(
-                            onClick = { localGameViewModel.onBoardClicked(it) },
+                            onClick = { onlineGameViewModel.updateBoard(it) },
                             shape = RectangleShape,
                             modifier = Modifier
                                 .border(4.dp, MaterialTheme.colorScheme.inversePrimary)
                                 .size(128.dp),
                         ) {
                             Text(
-                                text = state.value.board[it],
+                                text = state.value.session.board[it],
                                 fontSize = 32.sp,
                                 textAlign = TextAlign.Center
                             )

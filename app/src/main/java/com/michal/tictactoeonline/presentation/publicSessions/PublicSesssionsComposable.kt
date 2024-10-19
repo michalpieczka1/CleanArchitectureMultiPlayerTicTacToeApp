@@ -1,5 +1,12 @@
 package com.michal.tictactoeonline.presentation.publicSessions
 
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -71,7 +78,7 @@ fun PublicSessionsComposable(
                         LazyColumn(
                             contentPadding = PaddingValues(16.dp)
                         ) {
-                            items(state.sessions){ session ->
+                            items(state.sessions, key = { it.sessionName }){ session ->
                                 LaunchedEffect(key1 = session.playerCount) {
                                     if(session.playerCount == 2){
                                         delay(4000)
@@ -82,7 +89,8 @@ fun PublicSessionsComposable(
                                 SessionCard(
                                     session = session,
                                     onClick = { onGoToSession() },
-                                    isRemoved = session.playerCount == 2
+                                    isRemoved = session.playerCount == 2,
+                                    modifier = Modifier.animateItem(fadeOutSpec = tween(200,0, FastOutLinearInEasing))
                                 ) //TODO add navhost to onClick
                             }
                         }

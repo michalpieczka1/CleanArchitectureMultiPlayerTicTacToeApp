@@ -1,10 +1,5 @@
 package com.michal.tictactoeonline.presentation.publicSessions
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -17,19 +12,14 @@ import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.data.model.Session
 import com.michal.tictactoeonline.di.TicTacToeApplication
 import com.michal.tictactoeonline.util.Resource
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PublicSessionsViewModel(
     private var databaseRepository: DatabaseRepository,
-    var player: Player
+    val player: Player
 ) :ViewModel() {
     private val _uiState = MutableStateFlow<PublicSessionsUiState>(PublicSessionsUiState.Loading)
     val uiState:StateFlow<PublicSessionsUiState> = _uiState.asStateFlow()
@@ -62,7 +52,7 @@ class PublicSessionsViewModel(
 
     private fun getSessions(){
         viewModelScope.launch {
-            databaseRepository.getAllPublicSessions().collect{ sessionsResource ->
+            databaseRepository.getAllSessions().collect{ sessionsResource ->
                 when(sessionsResource){
                     is Resource.Error -> {
                         _uiState.value = PublicSessionsUiState.Error(sessionsResource.message ?: AppConstants.UNKNOWN_ERROR)

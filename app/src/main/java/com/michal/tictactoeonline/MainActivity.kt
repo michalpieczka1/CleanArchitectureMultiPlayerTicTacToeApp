@@ -1,44 +1,39 @@
 package com.michal.tictactoeonline
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.michal.tictactoeonline.data.model.Player
-import com.michal.tictactoeonline.data.model.Session
-import com.michal.tictactoeonline.presentation.main.MainScreen
-import com.michal.tictactoeonline.presentation.publicSessions.PublicSessionsComposable
-import com.michal.tictactoeonline.presentation.vsPc.LocalGameScreen
-import com.michal.tictactoeonline.presentation.vsPc.LocalGameViewModel
+import com.michal.tictactoeonline.di.AppContainer
+import com.michal.tictactoeonline.di.TicTacToeApplication
+import com.michal.tictactoeonline.presentation.onlineGame.OnlineGameComposable
+import com.michal.tictactoeonline.util.Resource
 import com.michal.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AppTheme {
 
-                fun test(session: Session, player: Player) {}
-                PublicSessionsComposable(
-                    player = Player("Nostii"),
-                    onGoBack = { /*TODO*/ },
-                    onGoToSession = {})
             }
         }
     }
 
 
-    @Preview(showBackground = true)
-    @Composable
-    fun TicTacToeScreenPreview() {
-        AppTheme {
+@Preview(showBackground = true)
+@Composable
+fun TicTacToeScreenPreview() {
+    AppTheme {
 
-        }
     }
 }
+    
