@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.tictactoe.R
 import com.michal.tictactoeonline.data.model.Player
 import nl.dionsegijn.konfetti.compose.KonfettiView
@@ -41,6 +42,7 @@ fun LocalGameComposable(
     localGameViewModel: LocalGameViewModel = viewModel(
         factory = LocalGameViewModel.provideFactory(player)
     ),
+    navController: NavController
 ) {
     val state = localGameViewModel.uiState.collectAsState()
     Surface(modifier = modifier.fillMaxSize()) {

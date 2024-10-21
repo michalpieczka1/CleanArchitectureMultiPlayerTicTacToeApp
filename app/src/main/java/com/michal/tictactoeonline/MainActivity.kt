@@ -29,11 +29,13 @@ class MainActivity : ComponentActivity() {
     }
 
 
-@Preview(showBackground = true)
-@Composable
-fun TicTacToeScreenPreview() {
-    AppTheme {
+    @Preview(showBackground = true)
+    @Composable
+    fun TicTacToeScreenPreview() {
+        AppTheme {
 
+        }
     }
+
 }
     

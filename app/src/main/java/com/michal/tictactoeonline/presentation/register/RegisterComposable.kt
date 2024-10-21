@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.presentation.CardTemplate
 
@@ -19,7 +20,8 @@ import com.michal.tictactoeonline.presentation.CardTemplate
 fun RegisterComposable(
     modifier: Modifier = Modifier,
     registerViewModel: RegisterViewModel = viewModel(),
-    onGoToNextScreen : (Player) -> Unit
+    onGoToNextScreen : (Player) -> Unit,
+    navController: NavController
 ){
     val state = registerViewModel.state.collectAsState()
     //TODO add savedStateHandle
@@ -40,7 +42,7 @@ fun RegisterComposable(
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
             registerViewModel.onRegisterClick()
-            onGoToNextScreen(registerViewModel.player)
+            navController.navigate()
         }) {
             Text(text = "Register",
                 style = MaterialTheme.typography.bodyMedium

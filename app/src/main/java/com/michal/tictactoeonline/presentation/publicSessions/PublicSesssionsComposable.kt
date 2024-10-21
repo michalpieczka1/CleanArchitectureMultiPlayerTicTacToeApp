@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.michal.tictactoeonline.data.model.Player
 import kotlinx.coroutines.delay
 
@@ -40,7 +41,8 @@ fun PublicSessionsComposable(
     onGoToSession: () -> Unit,
     publicSessionsViewModel: PublicSessionsViewModel = viewModel(
         factory = PublicSessionsViewModel.provideFactory(player)
-    )
+    ),
+    navController: NavController
 ) {
     val uiState = publicSessionsViewModel.uiState.collectAsState()
     Surface(modifier = modifier.fillMaxSize()) {

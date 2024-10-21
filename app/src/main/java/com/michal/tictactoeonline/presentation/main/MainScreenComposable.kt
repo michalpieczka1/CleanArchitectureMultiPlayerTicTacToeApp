@@ -33,11 +33,11 @@ import com.michal.tictactoeonline.data.model.Player
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    onLogOut: () -> Unit,
-    onPlayerVsPc: () -> Unit,
-    onCreateSession: () -> Unit,
-    onJoinSession: () -> Unit,
-    onPublicSessions: () -> Unit,
+    onLogOut: (Player) -> Unit,
+    onPlayerVsPc: (Player) -> Unit,
+    onCreateSession: (Player) -> Unit,
+    onJoinSession: (Player) -> Unit,
+    onPublicSessions: (Player) -> Unit,
     player: Player
 ) {
     Scaffold(
@@ -51,7 +51,7 @@ fun MainScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = onLogOut) {
+                    IconButton(onClick = ) {
                         Icon(imageVector = Icons.Filled.Close, contentDescription = null)
                     }
                 })
