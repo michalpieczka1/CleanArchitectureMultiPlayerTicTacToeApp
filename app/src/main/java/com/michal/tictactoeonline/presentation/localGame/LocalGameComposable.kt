@@ -5,14 +5,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -82,30 +83,42 @@ fun LocalGameComposable(
                 style = MaterialTheme.typography.displayMedium,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            Column {
-                FlowRow(
-                    maxItemsInEachRow = 3
+            Column(
+                modifier = Modifier
+                    .aspectRatio(1f)
+                    .fillMaxWidth()
+            ) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier
+                        .aspectRatio(1f)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(0.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
-                    state.value.board.indices.forEach {
+                    items(state.value.board.size) { index ->
                         Button(
-                            onClick = { localGameViewModel.onBoardClicked(it) },
+                            onClick = { localGameViewModel.onBoardClicked(index) },
                             shape = RectangleShape,
                             modifier = Modifier
+                                .aspectRatio(1f)
                                 .border(4.dp, MaterialTheme.colorScheme.inversePrimary)
-                                .size(128.dp),
+                                .fillMaxSize(),
+                            contentPadding = PaddingValues(2.dp)
                         ) {
                             Text(
-                                text = state.value.board[it],
+                                text = state.value.board[index],
                                 fontSize = 32.sp,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
+                                maxLines = 1
                             )
+
+
                         }
                     }
                 }
-
-
             }
             Spacer(modifier = Modifier.height(32.dp))
 
