@@ -1,4 +1,4 @@
-package com.michal.tictactoeonline.presentation.vsPc
+package com.michal.tictactoeonline.presentation.localGame
 
 import com.michal.tictactoeonline.data.model.Player
 

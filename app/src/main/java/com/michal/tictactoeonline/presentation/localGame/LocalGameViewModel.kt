@@ -1,43 +1,49 @@
-package com.michal.tictactoeonline.presentation.vsPc
+package com.michal.tictactoeonline.presentation.localGame
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.michal.tictactoeonline.data.model.Player
+import com.michal.tictactoeonline.data.PlayerRepository
+import com.michal.tictactoeonline.di.TicTacToeApplication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class LocalGameViewModel(
-    private val player: Player
+    private val playerRepository: PlayerRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LocalGameUiState())
     val uiState: StateFlow<LocalGameUiState> = _uiState.asStateFlow()
 
+
     companion object {
-        fun provideFactory(
-            player: Player
-        ): ViewModelProvider.Factory {
+        fun provideFactory(): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
-                    LocalGameViewModel(player = player)
+                    val application = (this[APPLICATION_KEY] as TicTacToeApplication)
+                    val repository = application.appContainer.playerRepository
+                    LocalGameViewModel(repository)
                 }
             }
         }
     }
-    //TODO add savedStateHandle
+
     init {
-        _uiState.update {
-            it.copy(
-                player = player,
-                currentTurn = player,
-                board = List(9) { "" },
-                winner = null,
-                isWin = null,
-                isTie = null
-            )
+        viewModelScope.launch {
+            playerRepository.currentPlayer.collect{player ->
+                _uiState.update {
+                    it.copy(
+                        player = player,
+                        currentTurn = player
+                    )
+                }
+            }
         }
     }
 
@@ -61,9 +67,9 @@ class LocalGameViewModel(
                         isTie = false,
                     )
                 }
+                if(uiState.value.currentTurn == uiState.value.player) updateWinCount()
                 return
-            }
-            else if(isBoardFilled()){
+            } else if (isBoardFilled()) {
                 _uiState.update {
                     it.copy(
                         winner = null,
@@ -73,7 +79,8 @@ class LocalGameViewModel(
                 }
                 return
             }
-            val newCurrentPlayer = if (uiState.value.currentTurn == uiState.value.player) uiState.value.playerPC else uiState.value.player
+            val newCurrentPlayer =
+                if (uiState.value.currentTurn == uiState.value.player) uiState.value.playerPC else uiState.value.player
             _uiState.update {
                 it.copy(
                     currentTurn = newCurrentPlayer
@@ -81,6 +88,14 @@ class LocalGameViewModel(
             }
         }
     }
+
+    private fun updateWinCount(){
+        viewModelScope.launch {
+            val currentWinCount = playerRepository.currentWinCount.first()
+            playerRepository.saveWinCount(currentWinCount.toInt()+1)
+        }
+    }
+
     private fun isWin(indexClicked: Int): Boolean {
         val board = uiState.value.board
         if (board.all { it == "" }) return false

@@ -1,4 +1,4 @@
-package com.michal.tictactoeonline.presentation.vsPc
+package com.michal.tictactoeonline.presentation.localGame
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -19,15 +22,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.example.tictactoe.R
-import com.michal.tictactoeonline.data.model.Player
 import nl.dionsegijn.konfetti.compose.KonfettiView
 import nl.dionsegijn.konfetti.core.Party
 import nl.dionsegijn.konfetti.core.emitter.Emitter
@@ -37,15 +39,17 @@ import java.util.concurrent.TimeUnit
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LocalGameComposable(
-    player: Player,
     modifier: Modifier = Modifier,
     localGameViewModel: LocalGameViewModel = viewModel(
-        factory = LocalGameViewModel.provideFactory(player)
+        factory = LocalGameViewModel.provideFactory()
     ),
-    navController: NavController
+    onGoBack: () -> Unit
 ) {
     val state = localGameViewModel.uiState.collectAsState()
-    Surface(modifier = modifier.fillMaxSize()) {
+    Surface(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
 
         if (state.value.isWin == true) {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -60,7 +64,6 @@ fun LocalGameComposable(
                 )
             }
         }
-
         Column(
             modifier = Modifier.padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -80,6 +83,7 @@ fun LocalGameComposable(
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(16.dp))
+
             Column {
                 FlowRow(
                     maxItemsInEachRow = 3
@@ -100,9 +104,29 @@ fun LocalGameComposable(
                         }
                     }
                 }
-            }
 
+
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Button(
+                    onClick = { onGoBack() },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    modifier = Modifier.fillMaxWidth(0.5f)
+                ) {
+                    Text(
+                        text = "Go back",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
         }
+
     }
 
 }

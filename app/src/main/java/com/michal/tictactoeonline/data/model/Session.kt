@@ -2,8 +2,10 @@ package com.michal.tictactoeonline.data.model
 
 import com.google.firebase.database.Exclude
 import com.google.firebase.database.IgnoreExtraProperties
+import kotlinx.serialization.Serializable
 
 @IgnoreExtraProperties
+@Serializable
 data class Session(
     val sessionName:String = "",
     val sessionPassword:String = "",
