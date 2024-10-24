@@ -55,7 +55,8 @@ fun TicTacToeApp(modifier: Modifier = Modifier){
             composable<OnlineGameScreen> { backStackEntry ->
                 val sessionKey = backStackEntry.toRoute<OnlineGameScreen>()
                 OnlineGameComposable(
-                    sessionKey = sessionKey.sessionKey
+                    sessionKey = sessionKey.sessionKey,
+                    onGoBack = { navController.navigate(MainScreen) }
                 )
             }
         }

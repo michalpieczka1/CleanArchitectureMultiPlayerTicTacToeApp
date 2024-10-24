@@ -28,6 +28,7 @@ data class Session(
             "player2" to player2,
             "playerCount" to playerCount,
             "isWin" to isWin,
+            "winner" to winner,
             "isTie" to isTie,
             "board" to board
         )

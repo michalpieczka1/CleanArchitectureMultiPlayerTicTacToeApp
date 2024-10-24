@@ -6,54 +6,72 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.michal.tictactoeonline.AppConstants
 import com.michal.tictactoeonline.data.DatabaseRepository
 import com.michal.tictactoeonline.data.PlayerRepository
+import com.michal.tictactoeonline.data.model.Session
 import com.michal.tictactoeonline.di.TicTacToeApplication
 import com.michal.tictactoeonline.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class OnlineGameViewModel(
     private val databaseRepository: DatabaseRepository,
     private val playerRepository: PlayerRepository,
-    private val sessionKey:String
-): ViewModel() {
+    private val sessionKey: String
+) : ViewModel() {
     private val _sessionUiState = MutableStateFlow(OnlineGameUiState())
     val sessionUiState: StateFlow<OnlineGameUiState> = _sessionUiState.asStateFlow()
 
-    companion object{
-        fun provideFactory(sessionKey: String):ViewModelProvider.Factory{
+    companion object {
+        fun provideFactory(sessionKey: String): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
                     val applicaton = (this[APPLICATION_KEY] as TicTacToeApplication)
                     val dbRepository = applicaton.appContainer.databaseRepository
                     val playerRepository = applicaton.appContainer.playerRepository
-                    OnlineGameViewModel(databaseRepository = dbRepository, playerRepository = playerRepository, sessionKey =  sessionKey)
-                }
-            }
-        }
-    }
-
-    init {
-        getPlayer1()
-    }
-
-    private fun getPlayer1(){
-        viewModelScope.launch {
-            playerRepository.currentPlayer.collect{player ->
-                _sessionUiState.update {
-                    it.copy(
-                        player1 = player
+                    OnlineGameViewModel(
+                        databaseRepository = dbRepository,
+                        playerRepository = playerRepository,
+                        sessionKey = sessionKey
                     )
                 }
             }
         }
     }
 
-    fun updateBoard(indexClicked: Int){
+    init {
+        getSession()
+        setPlayer1()
+    }
+
+
+    private fun setPlayer1() {
+        viewModelScope.launch {
+            playerRepository.currentPlayer.collect { player ->
+                _sessionUiState.update {
+                    it.copy(
+                        player1 = player,
+                        session = it.session.copy(player1 = sessionUiState.value.player1)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateWinCount(){
+        viewModelScope.launch {
+            if(sessionUiState.value.session.currentTurn == playerRepository.currentPlayer.first()){
+                    val currentWinCount = playerRepository.currentWinCount.first()
+                    playerRepository.saveWinCount(currentWinCount.toInt()+1)
+            }
+        }
+    }
+    fun updateBoard(indexClicked: Int) {
         if (sessionUiState.value.session.board[indexClicked] == "" && sessionUiState.value.session.isWin == null && sessionUiState.value.session.isTie == null) {
             val oldBoard = sessionUiState.value.session.board
             val newBoard = oldBoard.toMutableList()
@@ -75,9 +93,10 @@ class OnlineGameViewModel(
                         )
                     )
                 }
+                updateWinCount()
+                updateSession()
                 return
-            }
-            else if(isBoardFilled()){
+            } else if (isBoardFilled()) {
                 _sessionUiState.update {
                     it.copy(
                         session = sessionUiState.value.session.copy(
@@ -87,57 +106,60 @@ class OnlineGameViewModel(
                         )
                     )
                 }
+                updateSession()
                 return
             }
-            val newCurrentPlayer = if (sessionUiState.value.session.currentTurn == sessionUiState.value.session.player1) sessionUiState.value.session.player2 else sessionUiState.value.session.player1
-            if(newCurrentPlayer!=null){
-                _sessionUiState.update {
-                    it.copy(
-                        session = sessionUiState.value.session.copy(currentTurn = newCurrentPlayer)
-                    )
-                }
-            }
+//            val newCurrentPlayer = if (sessionUiState.value.session.currentTurn == sessionUiState.value.session.player1) sessionUiState.value.session.player2 else sessionUiState.value.session.player1
+//            if (newCurrentPlayer != null) {
+//                _sessionUiState.update {
+//                    it.copy(
+//                        session = sessionUiState.value.session.copy(currentTurn = newCurrentPlayer)
+//                    )
+//                }
+//            }
         }
         updateSession()
     }
 
-    private fun getSession(){
+    private fun getSession() {
         viewModelScope.launch {
-            databaseRepository.getSessionByKey(sessionKey = sessionKey).collect{ session ->
-                if(session is Resource.Success){
-                    _sessionUiState.update {
-                        it.copy(session = session.data!!.copy(player1 = _sessionUiState.value.player1))
+            databaseRepository.getSessionByKey(sessionKey = sessionKey).collect { session ->
+                when (session) {
+                    is Resource.Error -> {
+                        _sessionUiState.update {
+                            it.copy(
+                                sessionResource = Resource.Error(
+                                    session.message ?: AppConstants.UNKNOWN_ERROR
+                                )
+                            )
+                        }
+                    }
+
+                    is Resource.Loading -> {
+                        _sessionUiState.update {
+                            it.copy(
+                                sessionResource = Resource.Loading()
+                            )
+                        }
+                    }
+
+                    is Resource.Success -> {
+                        println("sesja ${session.data}")
+                        _sessionUiState.update {
+                            it.copy(
+                                session = session.data ?: Session(),
+                                sessionResource = Resource.Success(true)
+                            )
+                        }
                     }
                 }
             }
         }
-        updateSession()
     }
-    private fun updateSession(){
+
+    private fun updateSession() {
         viewModelScope.launch {
-            databaseRepository.updateSession(sessionKey,sessionUiState.value.session).collect{ sessionResource ->
-                when(sessionResource){
-                    is Resource.Error -> {
-                        _sessionUiState.update {
-                            it.copy(
-                                errorMessage = sessionResource.data,
-                                isLoading = false,
-                            )
-                        }
-                    }
-                    is Resource.Loading -> {
-                        _sessionUiState.update {
-                            it.copy(
-                                isLoading = true,
-                                errorMessage = null,
-                            )
-                        }
-                    }
-                    is Resource.Success -> {
-                        getSession()
-                    }
-                }
-            }
+            databaseRepository.updateSession(sessionKey, sessionUiState.value.session)
         }
     }
 

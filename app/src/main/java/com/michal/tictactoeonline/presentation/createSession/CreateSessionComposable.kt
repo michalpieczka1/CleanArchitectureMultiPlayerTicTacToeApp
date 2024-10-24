@@ -46,9 +46,8 @@ fun CreateSessionComposable(
             CreateSessionContent(
                 viewModel = viewModel,
                 modifier = modifier,
-                onSessionCreate = {
-                    viewModel.createSessionClick(onSessionCreate)
-            })
+                onSessionCreate = onSessionCreate
+                )
         })
     }
 }
@@ -57,7 +56,7 @@ fun CreateSessionComposable(
 fun CreateSessionContent(
     modifier: Modifier = Modifier,
     viewModel: CreateSessionViewModel,
-    onSessionCreate: (String) -> Unit,
+    onSessionCreate: (sessionKey) -> Unit
 ) {
     val state = viewModel.uiState.collectAsState()
     Column(
@@ -94,7 +93,7 @@ fun CreateSessionContent(
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(onClick = {
-            viewModel.createSessionClick(onSessionCreate = onSessionCreate)
+            viewModel.createSessionClick(onSessionCreate)
         }) {
             Text(text = "Create", style = MaterialTheme.typography.titleLarge)
         }

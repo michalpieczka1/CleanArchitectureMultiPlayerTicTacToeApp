@@ -62,7 +62,6 @@ class CreateSessionViewModel(
                         player = player
                     )
                 }
-                Log.i("test", uiState.value.toString())
             }
         }
     }
@@ -99,7 +98,7 @@ class CreateSessionViewModel(
                             sessionKey = newSessionKey
                             _uiState.update {
                                 it.copy(
-                                    resultResource = Resource.Success(true)
+                                    resultResource = Resource.Success(false)
                                 )
                             }
                                     println(uiState.value)
