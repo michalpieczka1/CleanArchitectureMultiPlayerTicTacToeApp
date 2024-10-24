@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.michal.tictactoeonline.data.PlayerRepository
 import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.di.TicTacToeApplication
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,10 +36,14 @@ class MainScreenViewModel(
         }
     }
 
-    fun onLogOutClick(){
-        viewModelScope.launch {
-            playerRepository.clearData()
-        }
+    fun onLogOutClick(onLogOut: () -> Unit){
+            viewModelScope.launch {
+                async {
+                    playerRepository.clearData()
+                }.await()
+                onLogOut()
+            }
+        //TODO check if its good practice6
     }
 
     companion object{

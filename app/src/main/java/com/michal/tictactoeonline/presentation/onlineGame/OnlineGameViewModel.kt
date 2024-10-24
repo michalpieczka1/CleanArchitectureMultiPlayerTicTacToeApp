@@ -7,58 +7,69 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.michal.tictactoeonline.data.DatabaseRepository
-import com.michal.tictactoeonline.data.model.Player
+import com.michal.tictactoeonline.data.PlayerRepository
 import com.michal.tictactoeonline.di.TicTacToeApplication
 import com.michal.tictactoeonline.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class OnlineGameViewModel(
     private val databaseRepository: DatabaseRepository,
-    private val player: Player,
+    private val playerRepository: PlayerRepository,
     private val sessionKey:String
 ): ViewModel() {
-    private val _sessionState = MutableStateFlow(OnlineGameUiState())
-    val sessionState: StateFlow<OnlineGameUiState> = _sessionState.asStateFlow()
+    private val _sessionUiState = MutableStateFlow(OnlineGameUiState())
+    val sessionUiState: StateFlow<OnlineGameUiState> = _sessionUiState.asStateFlow()
 
     companion object{
-        fun provideFactory(player: Player,sessionKey: String):ViewModelProvider.Factory{
+        fun provideFactory(sessionKey: String):ViewModelProvider.Factory{
             return viewModelFactory {
                 initializer {
                     val applicaton = (this[APPLICATION_KEY] as TicTacToeApplication)
                     val dbRepository = applicaton.appContainer.databaseRepository
-                    OnlineGameViewModel(dbRepository, player, sessionKey)
+                    val playerRepository = applicaton.appContainer.playerRepository
+                    OnlineGameViewModel(databaseRepository = dbRepository, playerRepository = playerRepository, sessionKey =  sessionKey)
                 }
             }
         }
     }
 
     init {
+        getPlayer1()
+    }
 
+    private fun getPlayer1(){
+        viewModelScope.launch {
+            playerRepository.currentPlayer.collect{player ->
+                _sessionUiState.update {
+                    it.copy(
+                        player1 = player
+                    )
+                }
+            }
+        }
     }
 
     fun updateBoard(indexClicked: Int){
-        if (sessionState.value.session.board[indexClicked] == "" && sessionState.value.session.isWin == null && sessionState.value.session.isTie == null) {
-            val oldBoard = sessionState.value.session.board
+        if (sessionUiState.value.session.board[indexClicked] == "" && sessionUiState.value.session.isWin == null && sessionUiState.value.session.isTie == null) {
+            val oldBoard = sessionUiState.value.session.board
             val newBoard = oldBoard.toMutableList()
-            newBoard[indexClicked] = sessionState.value.session.currentTurn.symbol ?: ""
+            newBoard[indexClicked] = sessionUiState.value.session.currentTurn.symbol ?: ""
 
-            _sessionState.update {
+            _sessionUiState.update {
                 it.copy(
-                    session = sessionState.value.session.copy(board = newBoard)
+                    session = sessionUiState.value.session.copy(board = newBoard)
                 )
             }
 
             if (isWin(indexClicked)) {
-                _sessionState.update {
+                _sessionUiState.update {
                     it.copy(
-                        session = sessionState.value.session.copy(
-                            winner = sessionState.value.session.currentTurn,
+                        session = sessionUiState.value.session.copy(
+                            winner = sessionUiState.value.session.currentTurn,
                             isWin = isWin(indexClicked),
                             isTie = false,
                         )
@@ -67,9 +78,9 @@ class OnlineGameViewModel(
                 return
             }
             else if(isBoardFilled()){
-                _sessionState.update {
+                _sessionUiState.update {
                     it.copy(
-                        session = sessionState.value.session.copy(
+                        session = sessionUiState.value.session.copy(
                             winner = null,
                             isWin = false,
                             isTie = true
@@ -78,11 +89,11 @@ class OnlineGameViewModel(
                 }
                 return
             }
-            val newCurrentPlayer = if (sessionState.value.session.currentTurn == sessionState.value.session.player1) sessionState.value.session.player2 else sessionState.value.session.player1
+            val newCurrentPlayer = if (sessionUiState.value.session.currentTurn == sessionUiState.value.session.player1) sessionUiState.value.session.player2 else sessionUiState.value.session.player1
             if(newCurrentPlayer!=null){
-                _sessionState.update {
+                _sessionUiState.update {
                     it.copy(
-                        session = sessionState.value.session.copy(currentTurn = newCurrentPlayer)
+                        session = sessionUiState.value.session.copy(currentTurn = newCurrentPlayer)
                     )
                 }
             }
@@ -94,8 +105,8 @@ class OnlineGameViewModel(
         viewModelScope.launch {
             databaseRepository.getSessionByKey(sessionKey = sessionKey).collect{ session ->
                 if(session is Resource.Success){
-                    _sessionState.update {
-                        it.copy(session = session.data!!)
+                    _sessionUiState.update {
+                        it.copy(session = session.data!!.copy(player1 = _sessionUiState.value.player1))
                     }
                 }
             }
@@ -104,10 +115,10 @@ class OnlineGameViewModel(
     }
     private fun updateSession(){
         viewModelScope.launch {
-            databaseRepository.updateSession(sessionKey,sessionState.value.session).collect{ sessionResource ->
+            databaseRepository.updateSession(sessionKey,sessionUiState.value.session).collect{ sessionResource ->
                 when(sessionResource){
                     is Resource.Error -> {
-                        _sessionState.update {
+                        _sessionUiState.update {
                             it.copy(
                                 errorMessage = sessionResource.data,
                                 isLoading = false,
@@ -115,7 +126,7 @@ class OnlineGameViewModel(
                         }
                     }
                     is Resource.Loading -> {
-                        _sessionState.update {
+                        _sessionUiState.update {
                             it.copy(
                                 isLoading = true,
                                 errorMessage = null,
@@ -131,7 +142,7 @@ class OnlineGameViewModel(
     }
 
     private fun isWin(indexClicked: Int): Boolean {
-        val board = sessionState.value.session.board
+        val board = sessionUiState.value.session.board
         if (board.all { it == "" }) return false
 
         val isColOrRowWin = when (indexClicked) {
@@ -175,6 +186,6 @@ class OnlineGameViewModel(
     }
 
     private fun isBoardFilled(): Boolean {
-        return sessionState.value.session.board.all { it != "" }
+        return sessionUiState.value.session.board.all { it != "" }
     }
 }

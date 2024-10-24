@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tictactoe.R
-import com.michal.tictactoeonline.data.model.Player
 import nl.dionsegijn.konfetti.compose.KonfettiView
 import nl.dionsegijn.konfetti.core.Party
 import nl.dionsegijn.konfetti.core.emitter.Emitter
@@ -36,14 +35,13 @@ import java.util.concurrent.TimeUnit
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OnlineGameComposable(
-    player: Player,
     sessionKey: String,
     modifier: Modifier = Modifier,
     onlineGameViewModel: OnlineGameViewModel = viewModel(
-        factory = OnlineGameViewModel.provideFactory(player,sessionKey)
+        factory = OnlineGameViewModel.provideFactory(sessionKey)
     ),
 ) {
-    val state = onlineGameViewModel.sessionState.collectAsState()
+    val state = onlineGameViewModel.sessionUiState.collectAsState()
     Surface(modifier = modifier.fillMaxSize()) {
 
         if (state.value.session.isWin == true) {

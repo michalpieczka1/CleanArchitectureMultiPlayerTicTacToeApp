@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tictactoe.R
+import kotlinx.coroutines.coroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,8 +100,7 @@ fun MainScreenComposable(
                 },
                 actions = {
                     IconButton(onClick = {
-                        mainScreenViewModel.onLogOutClick()
-                        onLogOut()
+                        mainScreenViewModel.onLogOutClick(onLogOut)
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,

@@ -7,10 +7,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.data.model.Session
+import com.michal.tictactoeonline.presentation.createSession.CreateSessionComposable
 import com.michal.tictactoeonline.presentation.localGame.LocalGameComposable
 import com.michal.tictactoeonline.presentation.main.MainScreenComposable
+import com.michal.tictactoeonline.presentation.onlineGame.OnlineGameComposable
 import com.michal.tictactoeonline.presentation.register.RegisterComposable
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
@@ -42,6 +45,19 @@ fun TicTacToeApp(modifier: Modifier = Modifier){
                     modifier = modifier
                 )
             }
+            composable<CreateSessionScreen> {
+                CreateSessionComposable(
+                    onCloseScreen = { navController.popBackStack() },
+                    onSessionCreate = { navController.navigate(OnlineGameScreen(it)) }
+                )
+
+            }
+            composable<OnlineGameScreen> { backStackEntry ->
+                val sessionKey = backStackEntry.toRoute<OnlineGameScreen>()
+                OnlineGameComposable(
+                    sessionKey = sessionKey.sessionKey
+                )
+            }
         }
     })
 }
@@ -63,7 +79,7 @@ object JoinSessionScreen
 
 @Serializable
 data class OnlineGameScreen(
-    val session: Session,
+    val sessionKey: String,
 )
 @Serializable
 object PublicSessionsScreen
