@@ -12,6 +12,7 @@ import com.michal.tictactoeonline.data.PlayerRepository
 import com.michal.tictactoeonline.data.model.Session
 import com.michal.tictactoeonline.di.TicTacToeApplication
 import com.michal.tictactoeonline.util.Resource
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,13 +46,51 @@ class OnlineGameViewModel(
     }
 
     init {
-        getSession()
-        setPlayers()
+        viewModelScope.launch {
+            getSession()
+            setPlayers()
+            updateSession()
+        }
     }
 
 
-    private fun setPlayers() {
-        viewModelScope.launch {
+    private suspend fun getSession() {
+            databaseRepository.getSessionByKey(sessionKey = sessionKey).collect { session ->
+                when (session) {
+                    is Resource.Error -> {
+                        _sessionUiState.update {
+                            it.copy(
+                                sessionResource = Resource.Error(
+                                    session.message ?: AppConstants.UNKNOWN_ERROR
+                                )
+                            )
+                        }
+                    }
+
+                    is Resource.Loading -> {
+                        _sessionUiState.update {
+                            it.copy(
+                                sessionResource = Resource.Loading()
+                            )
+                        }
+                    }
+
+                    is Resource.Success -> {
+                        _sessionUiState.update {
+                            it.copy(
+                                session = session.data ?: Session(),
+                                player1 = session.data?.player1,
+                                player2 = session.data?.player2,
+                                sessionResource = Resource.Success(true)
+                            )
+                        }
+                        println("zdobyta sesja")
+                    }
+                }
+            }
+    }
+
+    private suspend fun setPlayers() {
             if(_sessionUiState.value.player1 == null){
                 playerRepository.currentPlayer.collect { player ->
                     _sessionUiState.update {
@@ -61,7 +100,7 @@ class OnlineGameViewModel(
                         )
                     }
                 }
-                println(_sessionUiState.value.player1)
+                println("update 1 player")
             }else{
                 playerRepository.currentPlayer.collect { player ->
                     _sessionUiState.update {
@@ -72,9 +111,12 @@ class OnlineGameViewModel(
                     }
                 }
                 println("update 2 player")
-                println(sessionUiState.value)
             }
-        }
+    }
+
+    private fun updateSession() {
+            databaseRepository.updateSession(sessionKey, sessionUiState.value.session)
+            println("zaaktualizowana ${sessionUiState.value.session}")
     }
 
     private fun updateWinCount(){
@@ -85,6 +127,7 @@ class OnlineGameViewModel(
             }
         }
     }
+
     fun updateBoard(indexClicked: Int) {
         if (sessionUiState.value.session.board[indexClicked] == "" && sessionUiState.value.session.isWin == null && sessionUiState.value.session.isTie == null) {
             val oldBoard = sessionUiState.value.session.board
@@ -134,50 +177,6 @@ class OnlineGameViewModel(
             }
         }
         updateSession()
-    }
-
-    private fun getSession() {
-        viewModelScope.launch {
-            databaseRepository.getSessionByKey(sessionKey = sessionKey).collect { session ->
-                when (session) {
-                    is Resource.Error -> {
-                        _sessionUiState.update {
-                            it.copy(
-                                sessionResource = Resource.Error(
-                                    session.message ?: AppConstants.UNKNOWN_ERROR
-                                )
-                            )
-                        }
-                    }
-
-                    is Resource.Loading -> {
-                        _sessionUiState.update {
-                            it.copy(
-                                sessionResource = Resource.Loading()
-                            )
-                        }
-                    }
-
-                    is Resource.Success -> {
-                        println("get sesja ${session.data}")
-                        _sessionUiState.update {
-                            it.copy(
-                                session = session.data ?: Session(),
-                                player1 = session.data?.player1,
-                                player2 = session.data?.player2,
-                                sessionResource = Resource.Success(true)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun updateSession() {
-        viewModelScope.launch {
-            databaseRepository.updateSession(sessionKey, sessionUiState.value.session)
-        }
     }
 
     private fun isWin(indexClicked: Int): Boolean {

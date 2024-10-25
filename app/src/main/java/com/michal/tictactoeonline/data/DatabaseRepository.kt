@@ -63,7 +63,7 @@ class DatabaseRepository(
                 }
 
                 trySend(Resource.Success(session)).isSuccess
-                close()
+
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -202,6 +202,7 @@ class DatabaseRepository(
 
         try {
             firebaseRef.updateChildren(session.toMap())
+            println(session.toMap())
         } catch (e: Exception) {
             Log.i("errors", e.message ?: "Unknown error occurred")
         }
