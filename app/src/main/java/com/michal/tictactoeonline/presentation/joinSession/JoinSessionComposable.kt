@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,16 +24,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.data.model.Session
 import com.michal.tictactoeonline.presentation.CardTemplate
+import com.michal.tictactoeonline.util.Resource
 import kotlinx.coroutines.flow.Flow
+
+typealias sessionKey = String
 
 @Composable
 fun JoinSessionComposable(
-    player: Player,
     modifier: Modifier = Modifier,
     onCloseScreen: (() -> Unit)?,
-    onJoined: (String) -> Unit,
+    onJoined: (sessionKey) -> Unit,
     viewModel: JoinSessionViewModel = viewModel(
-        factory = JoinSessionViewModel.provideFactory(player)
+        factory = JoinSessionViewModel.provideFactory()
     )
 ) {
     Surface(
@@ -62,7 +65,7 @@ fun JoinSessionContent(modifier: Modifier = Modifier, viewModel: JoinSessionView
         Text(text = "Password", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(4.dp))
         TextField(
-            value = state.value.password ?: "",
+            value = state.value.password,
             onValueChange = { viewModel.onPasswordChange(it) })
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -79,15 +82,21 @@ fun JoinSessionContent(modifier: Modifier = Modifier, viewModel: JoinSessionView
         }
 
         Spacer(modifier = Modifier.height(32.dp))
-        LaunchedEffect(key1 = viewModel.sessionKey) {
-            if(viewModel.sessionKey != null){
-                onJoined(viewModel.sessionKey!!)
-            }
-        }
         Button(onClick = {
             viewModel.joinSessionClick()
         }) {
             Text(text = "Join", style = MaterialTheme.typography.titleLarge)
+        }
+        when(val result = state.value.sessionResource){
+            is Resource.Error -> {
+                Text(result.message!!) //TODO make custom error text
+            }
+            is Resource.Loading -> {
+                CircularProgressIndicator()
+            }
+            is Resource.Success -> {
+                onJoined(result.data!!)
+            }
         }
     }
 }

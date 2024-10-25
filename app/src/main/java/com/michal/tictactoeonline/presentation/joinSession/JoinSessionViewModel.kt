@@ -6,12 +6,11 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.michal.tictactoeonline.AppConstants
 import com.michal.tictactoeonline.data.DatabaseRepository
-import com.michal.tictactoeonline.data.model.Player
-import com.michal.tictactoeonline.data.model.Session
+import com.michal.tictactoeonline.data.PlayerRepository
 import com.michal.tictactoeonline.di.TicTacToeApplication
 import com.michal.tictactoeonline.util.Resource
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,12 +20,26 @@ import kotlinx.coroutines.launch
 
 class JoinSessionViewModel(
     private val databaseRepository: DatabaseRepository,
-    val player: Player
+    private val playerRepository: PlayerRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(JoinSessionUiState())
     val uiState: StateFlow<JoinSessionUiState> = _uiState.asStateFlow()
 
-    var sessionKey: String? = null
+    init {
+        setPlayer()
+    }
+
+    private fun setPlayer(){
+        viewModelScope.launch {
+            playerRepository.currentPlayer.collect{ player ->
+                _uiState.update {
+                    it.copy(
+                        player = player
+                    )
+                }
+            }
+        }
+    }
 
     fun onSessionNameChange(newName: String) {
         _uiState.update {
@@ -43,46 +56,37 @@ class JoinSessionViewModel(
     }
 
     fun joinSessionClick() {
-
         viewModelScope.launch {
-            val foundSessionKey = databaseRepository.getSessionKeyByNameAndPassword(
+            databaseRepository.getSessionKeyByNameAndPassword(
                 sessionName = uiState.value.sessionName,
                 password = uiState.value.password
-            ).first()
-            when (foundSessionKey) {
-                is Resource.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = foundSessionKey.message
-                        )
-                    }
-                }
-
-                is Resource.Loading -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = true,
-                            errorMessage = null
-                        )
-                    }
-                }
-
-                is Resource.Success -> {
-                    if(foundSessionKey.data != null){
-                        sessionKey = foundSessionKey.data
+            ).collect{ session ->
+                when(session){
+                    is Resource.Error -> {
                         _uiState.update {
                             it.copy(
-                                isLoading = false,
-                                errorMessage = null
+                                sessionResource = Resource.Error(session.data ?: AppConstants.UNKNOWN_ERROR)
                             )
                         }
-                    }else{
+                    }
+                    is Resource.Loading -> {
                         _uiState.update {
                             it.copy(
-                                isLoading = false,
-                                errorMessage = "Session not found"
+                                sessionResource = Resource.Loading()
                             )
+                        }
+                    }
+                    is Resource.Success -> {
+                        _uiState.update {
+                        if(session.data==null){
+                           it.copy(
+                               sessionResource = Resource.Error(AppConstants.UNKNOWN_ERROR)
+                           )
+                        }else{
+                            it.copy(
+                                sessionResource = Resource.Success(session.data)
+                            )
+                        }
                         }
                     }
                 }
@@ -91,14 +95,13 @@ class JoinSessionViewModel(
     }
 
     companion object {
-        fun provideFactory(
-            player: Player
-        ): ViewModelProvider.Factory {
+        fun provideFactory(): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
-                    val applicaton = (this[APPLICATION_KEY] as TicTacToeApplication)
-                    val dbRepository = applicaton.appContainer.databaseRepository
-                    JoinSessionViewModel(dbRepository, player)
+                    val application = (this[APPLICATION_KEY] as TicTacToeApplication)
+                    val dbRepository = application.appContainer.databaseRepository
+                    val playerRepository = application.appContainer.playerRepository
+                    JoinSessionViewModel(dbRepository, playerRepository)
                 }
             }
         }

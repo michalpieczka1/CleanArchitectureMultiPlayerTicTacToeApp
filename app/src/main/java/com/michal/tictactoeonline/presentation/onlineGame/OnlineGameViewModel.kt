@@ -46,19 +46,33 @@ class OnlineGameViewModel(
 
     init {
         getSession()
-        setPlayer1()
+        setPlayers()
     }
 
 
-    private fun setPlayer1() {
+    private fun setPlayers() {
         viewModelScope.launch {
-            playerRepository.currentPlayer.collect { player ->
-                _sessionUiState.update {
-                    it.copy(
-                        player1 = player,
-                        session = it.session.copy(player1 = sessionUiState.value.player1)
-                    )
+            if(_sessionUiState.value.player1 == null){
+                playerRepository.currentPlayer.collect { player ->
+                    _sessionUiState.update {
+                        it.copy(
+                            player1 = player,
+                            session = it.session.copy(player1 = player)
+                        )
+                    }
                 }
+                println(_sessionUiState.value.player1)
+            }else{
+                playerRepository.currentPlayer.collect { player ->
+                    _sessionUiState.update {
+                        it.copy(
+                            player2 = player,
+                            session = it.session.copy(player2 = player)
+                        )
+                    }
+                }
+                println("update 2 player")
+                println(sessionUiState.value)
             }
         }
     }
@@ -109,14 +123,15 @@ class OnlineGameViewModel(
                 updateSession()
                 return
             }
-//            val newCurrentPlayer = if (sessionUiState.value.session.currentTurn == sessionUiState.value.session.player1) sessionUiState.value.session.player2 else sessionUiState.value.session.player1
-//            if (newCurrentPlayer != null) {
-//                _sessionUiState.update {
-//                    it.copy(
-//                        session = sessionUiState.value.session.copy(currentTurn = newCurrentPlayer)
-//                    )
-//                }
-//            }
+            val newCurrentPlayer = if (sessionUiState.value.session.currentTurn == sessionUiState.value.session.player1) sessionUiState.value.session.player2 else sessionUiState.value.session.player1
+            if (newCurrentPlayer != null) {
+                _sessionUiState.update {
+                    it.copy(
+                        session = sessionUiState.value.session.copy(currentTurn = newCurrentPlayer)
+                    )
+                }
+                updateSession()
+            }
         }
         updateSession()
     }
@@ -144,10 +159,12 @@ class OnlineGameViewModel(
                     }
 
                     is Resource.Success -> {
-                        println("sesja ${session.data}")
+                        println("get sesja ${session.data}")
                         _sessionUiState.update {
                             it.copy(
                                 session = session.data ?: Session(),
+                                player1 = session.data?.player1,
+                                player2 = session.data?.player2,
                                 sessionResource = Resource.Success(true)
                             )
                         }

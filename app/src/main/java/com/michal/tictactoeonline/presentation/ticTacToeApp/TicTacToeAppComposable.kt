@@ -11,6 +11,7 @@ import androidx.navigation.toRoute
 import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.data.model.Session
 import com.michal.tictactoeonline.presentation.createSession.CreateSessionComposable
+import com.michal.tictactoeonline.presentation.joinSession.JoinSessionComposable
 import com.michal.tictactoeonline.presentation.localGame.LocalGameComposable
 import com.michal.tictactoeonline.presentation.main.MainScreenComposable
 import com.michal.tictactoeonline.presentation.onlineGame.OnlineGameComposable
@@ -48,9 +49,15 @@ fun TicTacToeApp(modifier: Modifier = Modifier){
             composable<CreateSessionScreen> {
                 CreateSessionComposable(
                     onCloseScreen = { navController.popBackStack() },
-                    onSessionCreate = { navController.navigate(OnlineGameScreen(it)) }
+                    onSessionCreate = { navController.navigate(OnlineGameScreen(sessionKey = it)) }
                 )
 
+            }
+            composable<JoinSessionScreen> {
+                JoinSessionComposable(
+                    onCloseScreen = { navController.popBackStack() },
+                    onJoined = { navController.navigate(OnlineGameScreen(sessionKey = it)) }
+                )
             }
             composable<OnlineGameScreen> { backStackEntry ->
                 val sessionKey = backStackEntry.toRoute<OnlineGameScreen>()

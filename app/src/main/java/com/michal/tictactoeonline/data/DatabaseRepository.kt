@@ -80,22 +80,30 @@ class DatabaseRepository(
 
     fun getSessionKeyByNameAndPassword(
         sessionName: String,
-        password: String?
+        password: String
     ): Flow<Resource<String>> = callbackFlow {
+        trySend(Resource.Loading())
+
         val sessionRef = firebaseDatabase.reference
-            .child(SESSIONS_PATH).orderByChild("sessionName").equalTo(sessionName).limitToFirst(1)
+            .child(SESSIONS_PATH)
 
         val listener = (object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val sessionKey = snapshot.key
+                for (sessionSnapshot in snapshot.children) {
+                    if (sessionSnapshot.child("sessionName").getValue<String>().equals(sessionName)
+                        && sessionSnapshot.child("sessionPassword").getValue<String>().equals(password)
+                    ) {
+                        val sessionKey = sessionSnapshot.key
 
-                if (sessionKey == null) {
-                    trySend(Resource.Error("Getting session returned null")).isFailure
-                    close()
-                    return
+                        if (sessionKey == null) {
+                            trySend(Resource.Error("Getting session returned null")).isFailure
+                            close()
+                            return
+                        }
+                        trySend(Resource.Success(sessionKey)).isSuccess
+                        close()
+                    }
                 }
-
-                trySend(Resource.Success(sessionKey)).isSuccess
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -104,7 +112,8 @@ class DatabaseRepository(
             }
 
         })
-        sessionRef.addValueEventListener(listener)
+
+        sessionRef.addListenerForSingleValueEvent(listener)
         awaitClose {
             sessionRef.removeEventListener(listener)
         }
@@ -178,25 +187,25 @@ class DatabaseRepository(
             .child(sessionKey)
             .removeValue()
             .addOnSuccessListener {
-                Log.i("successes","removed session")
+                Log.i("successes", "removed session")
             }
             .addOnFailureListener {
-                Log.i("errors","error removing session")
+                Log.i("errors", "error removing session")
             }
 
     }
 
 
-    fun updateSession(sessionKey: String, session: Session){
+    fun updateSession(sessionKey: String, session: Session) {
 
-            val firebaseRef = firebaseDatabase.reference.child(SESSIONS_PATH).child(sessionKey)
+        val firebaseRef = firebaseDatabase.reference.child(SESSIONS_PATH).child(sessionKey)
 
-            try {
-                firebaseRef.updateChildren(session.toMap())
-            } catch (e: Exception) {
-                Log.i("errors",e.message ?: "Unknown error occurred")
-            }
+        try {
+            firebaseRef.updateChildren(session.toMap())
+        } catch (e: Exception) {
+            Log.i("errors", e.message ?: "Unknown error occurred")
         }
+    }
 
 //
 //    suspend fun createPlayer(username:String): Player{
