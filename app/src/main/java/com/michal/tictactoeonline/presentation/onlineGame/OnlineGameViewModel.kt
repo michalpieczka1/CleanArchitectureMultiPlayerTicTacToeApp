@@ -26,8 +26,8 @@ class OnlineGameViewModel(
     private val playerRepository: PlayerRepository,
     private val sessionKey: String
 ) : ViewModel() {
-    private val _sessionUiState = MutableStateFlow(OnlineGameUiState())
-    val sessionUiState: StateFlow<OnlineGameUiState> = _sessionUiState.asStateFlow()
+    private val _uiState = MutableStateFlow(OnlineGameUiState())
+    val uiState: StateFlow<OnlineGameUiState> = _uiState.asStateFlow()
 
     companion object {
         fun provideFactory(sessionKey: String): ViewModelProvider.Factory {
@@ -55,7 +55,9 @@ class OnlineGameViewModel(
                 updateSession()
             }.await()
             launch {
+
                 observeSession()
+
             }
         }
     }
@@ -65,7 +67,7 @@ class OnlineGameViewModel(
         databaseRepository.observeSessionByKey(sessionKey = sessionKey).collect { session ->
             when (session) {
                 is Resource.Error -> {
-                    _sessionUiState.update {
+                    _uiState.update {
                         it.copy(
                             sessionResource = Resource.Error(
                                 session.message ?: AppConstants.UNKNOWN_ERROR
@@ -75,7 +77,7 @@ class OnlineGameViewModel(
                 }
 
                 is Resource.Loading -> {
-                    _sessionUiState.update {
+                    _uiState.update {
                         it.copy(
                             sessionResource = Resource.Loading()
                         )
@@ -83,13 +85,17 @@ class OnlineGameViewModel(
                 }
 
                 is Resource.Success -> {
-                    _sessionUiState.update {
+                    if(isEnded()){
+                        return@collect
+                    }
+
+                    _uiState.update {
                         it.copy(
                             session = session.data ?: Session(),
                             sessionResource = Resource.Success(true)
                         )
                     }
-                    println("zaobserwowana sesja")
+                    println("zaobserwowana sesja ${uiState.value.session}")
                 }
             }
         }
@@ -98,7 +104,7 @@ class OnlineGameViewModel(
     private suspend fun getSession() {
         when (val session = databaseRepository.getSessionByKey(sessionKey = sessionKey).last()) {
             is Resource.Error -> {
-                _sessionUiState.update {
+                _uiState.update {
                     it.copy(
                         sessionResource = Resource.Error(
                             session.message ?: AppConstants.UNKNOWN_ERROR
@@ -108,7 +114,7 @@ class OnlineGameViewModel(
             }
 
             is Resource.Loading -> {
-                _sessionUiState.update {
+                _uiState.update {
                     it.copy(
                         sessionResource = Resource.Loading()
                     )
@@ -116,7 +122,7 @@ class OnlineGameViewModel(
             }
 
             is Resource.Success -> {
-                _sessionUiState.update {
+                _uiState.update {
                     it.copy(
                         session = session.data ?: Session(),
                         sessionResource = Resource.Success(true)
@@ -130,8 +136,8 @@ class OnlineGameViewModel(
 
     private suspend fun setPlayers() {
         playerRepository.currentPlayer.first { player ->
-            if (_sessionUiState.value.session.player1 == null) {
-                _sessionUiState.update {
+            if (_uiState.value.session.player1 == null) {
+                _uiState.update {
                     it.copy(
                         session = it.session.copy(
                             player1 = player.copy(symbol = "X"),
@@ -142,7 +148,7 @@ class OnlineGameViewModel(
                 playerRepository.saveSymbol("X")
                 println("update 1 player")
             } else {
-                _sessionUiState.update {
+                _uiState.update {
                     it.copy(
                         session = it.session.copy(
                             player2 = player.copy(symbol = "O"),
@@ -158,13 +164,13 @@ class OnlineGameViewModel(
     }
 
     private fun updateSession() {
-        databaseRepository.updateSession(sessionKey, sessionUiState.value.session)
-        println("zaaktualizowana ${sessionUiState.value.session}")
+        databaseRepository.updateSession(sessionKey, uiState.value.session)
+        println("zaaktualizowana ${uiState.value.session}")
     }
 
     private fun updateWinCount() {
         viewModelScope.launch {
-            if (sessionUiState.value.session.currentTurn == playerRepository.currentPlayer.first()) {
+            if (uiState.value.session.currentTurn == playerRepository.currentPlayer.first()) {
                 val currentWinCount = playerRepository.currentWinCount.first()
                 playerRepository.saveWinCount(currentWinCount.toInt() + 1)
             }
@@ -172,17 +178,18 @@ class OnlineGameViewModel(
     }
 
     private fun setCurrentTurn() {
-        if(sessionUiState.value.session.player2 != null){
-            val newCurrentPlayer = if (sessionUiState.value.session.currentTurn == sessionUiState.value.session.player1){
-                sessionUiState.value.session.player2
-            } else {
-                sessionUiState.value.session.player1
-            }
+        if (uiState.value.session.player2 != null) {
+            val newCurrentPlayer =
+                if (uiState.value.session.currentTurn == uiState.value.session.player1) {
+                    uiState.value.session.player2
+                } else {
+                    uiState.value.session.player1
+                }
 
             if (newCurrentPlayer != null) {
-                _sessionUiState.update {
+                _uiState.update {
                     it.copy(
-                        session = sessionUiState.value.session.copy(currentTurn = newCurrentPlayer)
+                        session = uiState.value.session.copy(currentTurn = newCurrentPlayer)
                     )
                 }
             }
@@ -190,51 +197,41 @@ class OnlineGameViewModel(
     }
 
     fun updateBoard(indexClicked: Int) {
-        if (sessionUiState.value.session.board[indexClicked] == "" &&
-            sessionUiState.value.session.isWin == null &&
-            sessionUiState.value.session.isTie == null
-            ) {
+        if (uiState.value.session.board[indexClicked] == "" &&
+            uiState.value.session.isWin == null &&
+            uiState.value.session.isTie == null
+        ) {
             viewModelScope.launch {
                 val player = playerRepository.currentPlayer.first()
 
-                println("update board session gracz${sessionUiState.value.session.currentTurn} zebrany gracz: $player")
+                println("update board session gracz${uiState.value.session.currentTurn} zebrany gracz: $player")
 
-                if (sessionUiState.value.session.currentTurn == player) {
+                if (uiState.value.session.currentTurn == player) {
 
-                    val oldBoard = sessionUiState.value.session.board
+                    val oldBoard = uiState.value.session.board
                     val newBoard = oldBoard.toMutableList()
-                    newBoard[indexClicked] = sessionUiState.value.session.currentTurn?.symbol ?: ""
+                    newBoard[indexClicked] = uiState.value.session.currentTurn?.symbol ?: ""
 
-                    _sessionUiState.update {
+                    _uiState.update {
                         it.copy(
-                            session = sessionUiState.value.session.copy(board = newBoard)
+                            session = uiState.value.session.copy(board = newBoard)
                         )
                     }
 
-                    if (isWin(indexClicked)) {
-                        _sessionUiState.update {
-                            it.copy(
-                                session = sessionUiState.value.session.copy(
-                                    winner = sessionUiState.value.session.currentTurn,
-                                    isWin = isWin(indexClicked),
-                                    isTie = false,
-                                )
+                    val hasWon = isWin(indexClicked)
+                    val isTie = isBoardFilled() && !hasWon
+                    _uiState.update {
+                        it.copy(
+                            session = uiState.value.session.copy(
+                                winner = uiState.value.session.currentTurn,
+                                isWin = hasWon,
+                                isTie = isTie,
                             )
-                        }
+                        )
+                    }
+                    if (hasWon) {
                         updateWinCount()
-                        updateSession()
-                    } else if (isBoardFilled()) {
-                        _sessionUiState.update {
-                            it.copy(
-                                session = sessionUiState.value.session.copy(
-                                    winner = null,
-                                    isWin = false,
-                                    isTie = true
-                                )
-                            )
-                        }
-                        updateSession()
-                    }else{
+                    } else {
                         setCurrentTurn()
                     }
                     updateSession()
@@ -243,8 +240,12 @@ class OnlineGameViewModel(
         }
     }
 
+    private fun isEnded(): Boolean {
+        return (uiState.value.session.isWin == true|| uiState.value.session.isTie == true)
+    }
+
     private fun isWin(indexClicked: Int): Boolean {
-        val board = sessionUiState.value.session.board
+        val board = uiState.value.session.board
         if (board.all { it == "" }) return false
 
         val isColOrRowWin = when (indexClicked) {
@@ -288,6 +289,6 @@ class OnlineGameViewModel(
     }
 
     private fun isBoardFilled(): Boolean {
-        return sessionUiState.value.session.board.all { it != "" }
+        return uiState.value.session.board.all { it != "" }
     }
 }

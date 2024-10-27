@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,12 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -51,22 +48,10 @@ fun OnlineGameComposable(
         factory = OnlineGameViewModel.provideFactory(sessionKey)
     ),
 ) {
-    val state = onlineGameViewModel.sessionUiState.collectAsState()
+    val state = onlineGameViewModel.uiState.collectAsState()
     Surface(modifier = modifier.fillMaxSize()) {
 
-        if (state.value.session.isWin == true) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                KonfettiView(
-                    parties = listOf(
-                        Party(
-                            emitter = Emitter(duration = 5, TimeUnit.SECONDS).perSecond(50),
-                            size = listOf(Size.LARGE),
-                        )
-                    ),
-                    modifier = Modifier.matchParentSize()
-                )
-            }
-        }
+
         when(state.value.sessionResource){
             is Resource.Error -> {
 
@@ -75,13 +60,27 @@ fun OnlineGameComposable(
 
             }
             is Resource.Success -> {
+                if (state.value.session.isWin == true) {
+                    println("wygrana")
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        KonfettiView(
+                            parties = listOf(
+                                Party(
+                                    emitter = Emitter(duration = 5, TimeUnit.SECONDS).perSecond(50),
+                                    size = listOf(Size.LARGE),
+                                )
+                            ),
+                            modifier = Modifier.matchParentSize()
+                        )
+                    }
+                }
                 Column(
                     modifier = Modifier.padding(32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     val displayedText = if (state.value.session.isWin == true) {
-                        stringResource(R.string.is_the_winner, state.value.session.winner ?: "Unknown" )
+                        stringResource(R.string.is_the_winner, state.value.session.winner?.username ?: "Unknown" )
                     } else if (state.value.session.isTie == true) {
                         stringResource(R.string.it_s_a_tie)
                     } else if(state.value.session.currentTurn == null) {
