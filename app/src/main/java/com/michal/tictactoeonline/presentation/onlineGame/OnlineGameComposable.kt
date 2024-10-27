@@ -81,11 +81,13 @@ fun OnlineGameComposable(
                     verticalArrangement = Arrangement.Center
                 ) {
                     val displayedText = if (state.value.session.isWin == true) {
-                        stringResource(R.string.is_the_winner, state.value.session.currentTurn.username)
+                        stringResource(R.string.is_the_winner, state.value.session.winner ?: "Unknown" )
                     } else if (state.value.session.isTie == true) {
                         stringResource(R.string.it_s_a_tie)
-                    } else {
-                        stringResource(R.string.someone_turn, state.value.session.currentTurn.username)
+                    } else if(state.value.session.currentTurn == null) {
+                        stringResource(R.string.waiting_for_all_players)
+                    }else{
+                        stringResource(R.string.someone_turn, state.value.session.currentTurn?.username ?: "Unknown")
                     }
 
                     Text(

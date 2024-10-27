@@ -9,10 +9,10 @@ import kotlinx.serialization.Serializable
 data class Session(
     val sessionName:String = "",
     val sessionPassword:String = "",
-    val currentTurn: Player = Player(),
-    val player1:Player = Player(),
+    val currentTurn: Player? = null,
+    val player1:Player? = null,
     val player2: Player? = null,
-    val playerCount:Int = 1,
+    val playerCount:Int = 0,
     val isWin:Boolean? = null,
     val winner:Player? = null,
     val isTie:Boolean? = null,

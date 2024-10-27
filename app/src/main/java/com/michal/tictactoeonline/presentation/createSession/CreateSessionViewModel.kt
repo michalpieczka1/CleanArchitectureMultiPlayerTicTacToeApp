@@ -34,9 +34,6 @@ class CreateSessionViewModel(
     lateinit var sessionKey: String
 
 
-    init {
-        setPlayer()
-    }
 
     fun onSessionNameChange(newName: String) {
         _uiState.update {
@@ -54,22 +51,9 @@ class CreateSessionViewModel(
         }
     }
 
-    private fun setPlayer() {
-        viewModelScope.launch {
-            playerRepository.currentPlayer.collect { player ->
-                _uiState.update {
-                    it.copy(
-                        player = player
-                    )
-                }
-            }
-        }
-    }
-
     fun createSessionClick(onSessionCreate: (String) -> Unit) {
         viewModelScope.launch {
             databaseRepository.createSession(
-                uiState.value.player,
                 uiState.value.sessionName,
                 uiState.value.password
             ).collect { createSessionResource ->
@@ -101,7 +85,6 @@ class CreateSessionViewModel(
                                     resultResource = Resource.Success(false)
                                 )
                             }
-                                    println(uiState.value)
                             onSessionCreate(sessionKey)
                         } else {
                             _uiState.update {

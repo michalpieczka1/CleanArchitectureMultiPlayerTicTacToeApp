@@ -52,7 +52,7 @@ fun SessionCard(modifier: Modifier = Modifier, session: Session, onClick: () -> 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Filled.AccountCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = session.player1.username, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, maxLines = 1)
+                    Text(text = session.player1?.username ?: "Unknown", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, maxLines = 1)
                 }
             }
             Text(text = "${session.playerCount} / 2", style = MaterialTheme.typography.titleMedium)

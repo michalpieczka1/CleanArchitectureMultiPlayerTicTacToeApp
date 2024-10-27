@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -32,9 +33,9 @@ class OnlineGameViewModel(
         fun provideFactory(sessionKey: String): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
-                    val applicaton = (this[APPLICATION_KEY] as TicTacToeApplication)
-                    val dbRepository = applicaton.appContainer.databaseRepository
-                    val playerRepository = applicaton.appContainer.playerRepository
+                    val application = (this[APPLICATION_KEY] as TicTacToeApplication)
+                    val dbRepository = application.appContainer.databaseRepository
+                    val playerRepository = application.appContainer.playerRepository
                     OnlineGameViewModel(
                         databaseRepository = dbRepository,
                         playerRepository = playerRepository,
@@ -47,136 +48,199 @@ class OnlineGameViewModel(
 
     init {
         viewModelScope.launch {
-            getSession()
-            setPlayers()
-            updateSession()
+            async {
+                getSession()
+                setPlayers()
+                setCurrentTurn()
+                updateSession()
+            }.await()
+            launch {
+                observeSession()
+            }
         }
     }
 
 
-    private suspend fun getSession() {
-            databaseRepository.getSessionByKey(sessionKey = sessionKey).collect { session ->
-                when (session) {
-                    is Resource.Error -> {
-                        _sessionUiState.update {
-                            it.copy(
-                                sessionResource = Resource.Error(
-                                    session.message ?: AppConstants.UNKNOWN_ERROR
-                                )
+    private suspend fun observeSession() {
+        databaseRepository.observeSessionByKey(sessionKey = sessionKey).collect { session ->
+            when (session) {
+                is Resource.Error -> {
+                    _sessionUiState.update {
+                        it.copy(
+                            sessionResource = Resource.Error(
+                                session.message ?: AppConstants.UNKNOWN_ERROR
                             )
-                        }
-                    }
-
-                    is Resource.Loading -> {
-                        _sessionUiState.update {
-                            it.copy(
-                                sessionResource = Resource.Loading()
-                            )
-                        }
-                    }
-
-                    is Resource.Success -> {
-                        _sessionUiState.update {
-                            it.copy(
-                                session = session.data ?: Session(),
-                                player1 = session.data?.player1,
-                                player2 = session.data?.player2,
-                                sessionResource = Resource.Success(true)
-                            )
-                        }
-                        println("zdobyta sesja")
+                        )
                     }
                 }
+
+                is Resource.Loading -> {
+                    _sessionUiState.update {
+                        it.copy(
+                            sessionResource = Resource.Loading()
+                        )
+                    }
+                }
+
+                is Resource.Success -> {
+                    _sessionUiState.update {
+                        it.copy(
+                            session = session.data ?: Session(),
+                            sessionResource = Resource.Success(true)
+                        )
+                    }
+                    println("zaobserwowana sesja")
+                }
             }
+        }
+    }
+
+    private suspend fun getSession() {
+        when (val session = databaseRepository.getSessionByKey(sessionKey = sessionKey).last()) {
+            is Resource.Error -> {
+                _sessionUiState.update {
+                    it.copy(
+                        sessionResource = Resource.Error(
+                            session.message ?: AppConstants.UNKNOWN_ERROR
+                        )
+                    )
+                }
+            }
+
+            is Resource.Loading -> {
+                _sessionUiState.update {
+                    it.copy(
+                        sessionResource = Resource.Loading()
+                    )
+                }
+            }
+
+            is Resource.Success -> {
+                _sessionUiState.update {
+                    it.copy(
+                        session = session.data ?: Session(),
+                        sessionResource = Resource.Success(true)
+                    )
+                }
+                println("zdobyta sesja ${session.data ?: "pusta"}")
+            }
+        }
+
     }
 
     private suspend fun setPlayers() {
-            if(_sessionUiState.value.player1 == null){
-                playerRepository.currentPlayer.collect { player ->
-                    _sessionUiState.update {
-                        it.copy(
-                            player1 = player,
-                            session = it.session.copy(player1 = player)
+        playerRepository.currentPlayer.first { player ->
+            if (_sessionUiState.value.session.player1 == null) {
+                _sessionUiState.update {
+                    it.copy(
+                        session = it.session.copy(
+                            player1 = player.copy(symbol = "X"),
+                            playerCount = 1
                         )
-                    }
+                    )
                 }
+                playerRepository.saveSymbol("X")
                 println("update 1 player")
-            }else{
-                playerRepository.currentPlayer.collect { player ->
-                    _sessionUiState.update {
-                        it.copy(
-                            player2 = player,
-                            session = it.session.copy(player2 = player)
+            } else {
+                _sessionUiState.update {
+                    it.copy(
+                        session = it.session.copy(
+                            player2 = player.copy(symbol = "O"),
+                            playerCount = 2
                         )
-                    }
+                    )
                 }
+                playerRepository.saveSymbol("O")
                 println("update 2 player")
             }
+            true
+        }
     }
 
     private fun updateSession() {
-            databaseRepository.updateSession(sessionKey, sessionUiState.value.session)
-            println("zaaktualizowana ${sessionUiState.value.session}")
+        databaseRepository.updateSession(sessionKey, sessionUiState.value.session)
+        println("zaaktualizowana ${sessionUiState.value.session}")
     }
 
-    private fun updateWinCount(){
+    private fun updateWinCount() {
         viewModelScope.launch {
-            if(sessionUiState.value.session.currentTurn == playerRepository.currentPlayer.first()){
-                    val currentWinCount = playerRepository.currentWinCount.first()
-                    playerRepository.saveWinCount(currentWinCount.toInt()+1)
+            if (sessionUiState.value.session.currentTurn == playerRepository.currentPlayer.first()) {
+                val currentWinCount = playerRepository.currentWinCount.first()
+                playerRepository.saveWinCount(currentWinCount.toInt() + 1)
             }
         }
     }
 
-    fun updateBoard(indexClicked: Int) {
-        if (sessionUiState.value.session.board[indexClicked] == "" && sessionUiState.value.session.isWin == null && sessionUiState.value.session.isTie == null) {
-            val oldBoard = sessionUiState.value.session.board
-            val newBoard = oldBoard.toMutableList()
-            newBoard[indexClicked] = sessionUiState.value.session.currentTurn.symbol ?: ""
-
-            _sessionUiState.update {
-                it.copy(
-                    session = sessionUiState.value.session.copy(board = newBoard)
-                )
+    private fun setCurrentTurn() {
+        if(sessionUiState.value.session.player2 != null){
+            val newCurrentPlayer = if (sessionUiState.value.session.currentTurn == sessionUiState.value.session.player1){
+                sessionUiState.value.session.player2
+            } else {
+                sessionUiState.value.session.player1
             }
 
-            if (isWin(indexClicked)) {
-                _sessionUiState.update {
-                    it.copy(
-                        session = sessionUiState.value.session.copy(
-                            winner = sessionUiState.value.session.currentTurn,
-                            isWin = isWin(indexClicked),
-                            isTie = false,
-                        )
-                    )
-                }
-                updateWinCount()
-                updateSession()
-                return
-            } else if (isBoardFilled()) {
-                _sessionUiState.update {
-                    it.copy(
-                        session = sessionUiState.value.session.copy(
-                            winner = null,
-                            isWin = false,
-                            isTie = true
-                        )
-                    )
-                }
-                updateSession()
-                return
-            }
-            val newCurrentPlayer = if (sessionUiState.value.session.currentTurn == sessionUiState.value.session.player1) sessionUiState.value.session.player2 else sessionUiState.value.session.player1
             if (newCurrentPlayer != null) {
                 _sessionUiState.update {
                     it.copy(
                         session = sessionUiState.value.session.copy(currentTurn = newCurrentPlayer)
                     )
                 }
-                updateSession()
             }
         }
-        updateSession()
+    }
+
+    fun updateBoard(indexClicked: Int) {
+        if (sessionUiState.value.session.board[indexClicked] == "" &&
+            sessionUiState.value.session.isWin == null &&
+            sessionUiState.value.session.isTie == null
+            ) {
+            viewModelScope.launch {
+                val player = playerRepository.currentPlayer.first()
+
+                println("update board session gracz${sessionUiState.value.session.currentTurn} zebrany gracz: $player")
+
+                if (sessionUiState.value.session.currentTurn == player) {
+
+                    val oldBoard = sessionUiState.value.session.board
+                    val newBoard = oldBoard.toMutableList()
+                    newBoard[indexClicked] = sessionUiState.value.session.currentTurn?.symbol ?: ""
+
+                    _sessionUiState.update {
+                        it.copy(
+                            session = sessionUiState.value.session.copy(board = newBoard)
+                        )
+                    }
+
+                    if (isWin(indexClicked)) {
+                        _sessionUiState.update {
+                            it.copy(
+                                session = sessionUiState.value.session.copy(
+                                    winner = sessionUiState.value.session.currentTurn,
+                                    isWin = isWin(indexClicked),
+                                    isTie = false,
+                                )
+                            )
+                        }
+                        updateWinCount()
+                        updateSession()
+                    } else if (isBoardFilled()) {
+                        _sessionUiState.update {
+                            it.copy(
+                                session = sessionUiState.value.session.copy(
+                                    winner = null,
+                                    isWin = false,
+                                    isTie = true
+                                )
+                            )
+                        }
+                        updateSession()
+                    }else{
+                        setCurrentTurn()
+                    }
+                    updateSession()
+                }
+            }
+        }
     }
 
     private fun isWin(indexClicked: Int): Boolean {

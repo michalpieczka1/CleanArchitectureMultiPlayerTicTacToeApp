@@ -8,4 +8,5 @@
     <string name="is_the_winner">%1$s is the winner 🥳</string>
     <string name="it_s_a_tie">It\'s a tie!</string>
     <string name="someone_turn">%1$s turn!</string>
+    <string name="waiting_for_all_players">Waiting for all players...</string>
 </resources>

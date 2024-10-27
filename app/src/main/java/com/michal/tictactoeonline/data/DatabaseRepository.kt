@@ -14,7 +14,6 @@ import com.michal.tictactoeonline.util.Resource
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
 
 class DatabaseRepository(
     private var firebaseDatabase: FirebaseDatabase
@@ -45,7 +44,7 @@ class DatabaseRepository(
         }
     }
 
-    fun getSessionByKey(sessionKey: String): Flow<Resource<Session>> = callbackFlow {
+    fun observeSessionByKey(sessionKey: String): Flow<Resource<Session>> = callbackFlow {
         trySend(Resource.Loading())
 
         val sessionRef = firebaseDatabase.reference
@@ -76,6 +75,32 @@ class DatabaseRepository(
         awaitClose {
             sessionRef.removeEventListener(listener)
         }
+    }
+    fun getSessionByKey(sessionKey: String): Flow<Resource<Session>> = callbackFlow {
+        trySend(Resource.Loading())
+
+        firebaseDatabase.reference
+            .child(SESSIONS_PATH)
+            .child(sessionKey)
+            .get()
+            .addOnSuccessListener { sessionSnapshot ->
+                val session = sessionSnapshot.getValue<Session>()
+                if (session == null) {
+                    trySend(Resource.Error("Getting session returned null")).isFailure
+                    close()
+                    return@addOnSuccessListener
+                }
+
+                trySend(Resource.Success(session)).isSuccess
+                close()
+            }
+
+            .addOnFailureListener { errorSnapshot ->
+                trySend(Resource.Error(errorSnapshot.message ?: AppConstants.UNKNOWN_ERROR)).isFailure
+                close()
+            }
+
+        awaitClose()
     }
 
     fun getSessionKeyByNameAndPassword(
@@ -120,7 +145,6 @@ class DatabaseRepository(
     }
 
     fun createSession(
-        player1: Player,
         sessionName: String,
         password: String?
     ): Flow<Resource<String>> =
@@ -153,9 +177,7 @@ class DatabaseRepository(
                     val session = Session(
                         sessionName = sessionName,
                         sessionPassword = password ?: "",
-                        player1 = player1,
                         playerCount = 1,
-                        currentTurn = player1
                     )
 
                     sessionRef.setValue(session)
