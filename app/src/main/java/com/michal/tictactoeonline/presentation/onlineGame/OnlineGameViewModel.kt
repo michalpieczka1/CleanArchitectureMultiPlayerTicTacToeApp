@@ -85,17 +85,13 @@ class OnlineGameViewModel(
                 }
 
                 is Resource.Success -> {
-                    if(isEnded()){
-                        return@collect
-                    }
-
                     _uiState.update {
                         it.copy(
                             session = session.data ?: Session(),
                             sessionResource = Resource.Success(true)
                         )
                     }
-                    println("zaobserwowana sesja ${uiState.value.session}")
+
                 }
             }
         }
@@ -128,7 +124,6 @@ class OnlineGameViewModel(
                         sessionResource = Resource.Success(true)
                     )
                 }
-                println("zdobyta sesja ${session.data ?: "pusta"}")
             }
         }
 
@@ -146,7 +141,6 @@ class OnlineGameViewModel(
                     )
                 }
                 playerRepository.saveSymbol("X")
-                println("update 1 player")
             } else {
                 _uiState.update {
                     it.copy(
@@ -157,7 +151,7 @@ class OnlineGameViewModel(
                     )
                 }
                 playerRepository.saveSymbol("O")
-                println("update 2 player")
+
             }
             true
         }
@@ -165,7 +159,6 @@ class OnlineGameViewModel(
 
     private fun updateSession() {
         databaseRepository.updateSession(sessionKey, uiState.value.session)
-        println("zaaktualizowana ${uiState.value.session}")
     }
 
     private fun updateWinCount() {
@@ -178,14 +171,13 @@ class OnlineGameViewModel(
     }
 
     private fun setCurrentTurn() {
-        if (uiState.value.session.player2 != null) {
+        if(uiState.value.session.player2 != null){
             val newCurrentPlayer =
                 if (uiState.value.session.currentTurn == uiState.value.session.player1) {
                     uiState.value.session.player2
                 } else {
                     uiState.value.session.player1
                 }
-
             if (newCurrentPlayer != null) {
                 _uiState.update {
                     it.copy(
@@ -193,6 +185,7 @@ class OnlineGameViewModel(
                     )
                 }
             }
+
         }
     }
 
@@ -204,7 +197,6 @@ class OnlineGameViewModel(
             viewModelScope.launch {
                 val player = playerRepository.currentPlayer.first()
 
-                println("update board session gracz${uiState.value.session.currentTurn} zebrany gracz: $player")
 
                 if (uiState.value.session.currentTurn == player) {
 
@@ -212,34 +204,38 @@ class OnlineGameViewModel(
                     val newBoard = oldBoard.toMutableList()
                     newBoard[indexClicked] = uiState.value.session.currentTurn?.symbol ?: ""
 
-                    _uiState.update {
-                        it.copy(
-                            session = uiState.value.session.copy(board = newBoard)
-                        )
-                    }
+                    async{
 
-                    val hasWon = isWin(indexClicked)
-                    val isTie = isBoardFilled() && !hasWon
-                    _uiState.update {
-                        it.copy(
-                            session = uiState.value.session.copy(
-                                winner = uiState.value.session.currentTurn,
-                                isWin = hasWon,
-                                isTie = isTie,
+                        _uiState.update {
+                            it.copy(
+                                session = uiState.value.session.copy(board = newBoard)
                             )
-                        )
-                    }
-                    if (hasWon) {
-                        updateWinCount()
-                    } else {
-                        setCurrentTurn()
-                    }
+                        }
+
+                        val hasWon = isWin(indexClicked)
+                        val isTie = isBoardFilled() && !hasWon
+                        if (hasWon || isTie) {
+                            _uiState.update {
+                                it.copy(
+                                    session = uiState.value.session.copy(
+                                        winner = uiState.value.session.currentTurn,
+                                        isWin = hasWon,
+                                        isTie = isTie,
+                                    )
+                                )
+                            }
+                        }
+                        if (hasWon) {
+                            updateWinCount()
+                        } else if (!isTie) {
+                            setCurrentTurn()
+                        }
+                    }.await()
                     updateSession()
                 }
             }
         }
     }
-
     private fun isEnded(): Boolean {
         return (uiState.value.session.isWin == true|| uiState.value.session.isTie == true)
     }

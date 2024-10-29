@@ -63,6 +63,10 @@ class DatabaseRepository(
 
                 trySend(Resource.Success(session)).isSuccess
 
+                if(session.isWin == true || session.isTie == true){
+                    close()
+                    return
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -222,12 +226,28 @@ class DatabaseRepository(
 
         val firebaseRef = firebaseDatabase.reference.child(SESSIONS_PATH).child(sessionKey)
 
-        try {
-            firebaseRef.updateChildren(session.toMap())
-            println(session.toMap())
-        } catch (e: Exception) {
-            Log.i("errors", e.message ?: "Unknown error occurred")
-        }
+        val newSession = Session(
+            sessionName = session.sessionName,
+            sessionPassword = session.sessionPassword,
+            player1 = session.player1,
+            player2 = session.player2,
+            playerCount = session.playerCount,
+            winner = session.winner,
+            isWin = session.isWin,
+            isTie = session.isTie,
+            board = session.board,
+            currentTurn = session.currentTurn,
+
+        )
+
+
+            firebaseRef.setValue(newSession).addOnSuccessListener {
+                firebaseRef.get().addOnSuccessListener {
+                    println(session.isWin)
+                    println("baza: ${it.getValue<Session>()?.isWin}")
+                }
+            }
+
     }
 
 //
