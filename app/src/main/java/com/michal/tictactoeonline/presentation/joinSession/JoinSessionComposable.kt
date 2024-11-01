@@ -83,7 +83,7 @@ fun JoinSessionContent(modifier: Modifier = Modifier, viewModel: JoinSessionView
 
         Spacer(modifier = Modifier.height(32.dp))
         Button(onClick = {
-            viewModel.joinSessionClick()
+            viewModel.joinSessionClick(onJoined)
         }) {
             Text(text = "Join", style = MaterialTheme.typography.titleLarge)
         }
@@ -95,7 +95,7 @@ fun JoinSessionContent(modifier: Modifier = Modifier, viewModel: JoinSessionView
                 CircularProgressIndicator()
             }
             is Resource.Success -> {
-                onJoined(result.data!!)
+                Text(text = "Udane")
             }
         }
     }

@@ -82,7 +82,7 @@ class CreateSessionViewModel(
                             sessionKey = newSessionKey
                             _uiState.update {
                                 it.copy(
-                                    resultResource = Resource.Success(false)
+                                    resultResource = Resource.Success(true)
                                 )
                             }
                             onSessionCreate(sessionKey)

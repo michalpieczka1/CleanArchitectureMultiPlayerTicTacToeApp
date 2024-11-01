@@ -60,8 +60,7 @@ fun OnlineGameComposable(
 
             }
             is Resource.Success -> {
-                if (state.value.session.isWin == true) {
-                    println("wygrana")
+                if (state.value.session.win == true) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         KonfettiView(
                             parties = listOf(
@@ -79,9 +78,9 @@ fun OnlineGameComposable(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    val displayedText = if (state.value.session.isWin == true) {
+                    val displayedText = if (state.value.session.win == true) {
                         stringResource(R.string.is_the_winner, state.value.session.winner?.username ?: "Unknown" )
-                    } else if (state.value.session.isTie == true) {
+                    } else if (state.value.session.tie == true) {
                         stringResource(R.string.it_s_a_tie)
                     } else if(state.value.session.currentTurn == null) {
                         stringResource(R.string.waiting_for_all_players)

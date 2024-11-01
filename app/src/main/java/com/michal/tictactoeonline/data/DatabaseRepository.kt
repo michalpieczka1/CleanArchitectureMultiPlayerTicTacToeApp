@@ -8,7 +8,6 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.getValue
 import com.michal.tictactoeonline.AppConstants
 import com.michal.tictactoeonline.AppConstants.SESSIONS_PATH
-import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.data.model.Session
 import com.michal.tictactoeonline.util.Resource
 import kotlinx.coroutines.channels.awaitClose
@@ -19,13 +18,13 @@ class DatabaseRepository(
     private var firebaseDatabase: FirebaseDatabase
 ) {
 
-    fun getAllSessions(): Flow<Resource<List<Session>>> = callbackFlow {
+    fun observeAllSessions(): Flow<Resource<List<Session>>> = callbackFlow {
         trySend(Resource.Loading())
-
         val sessionRef = firebaseDatabase.reference.child(SESSIONS_PATH)
+
         val listener = (object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val sessionList = mutableListOf<Session?>()
+                val sessionList = mutableSetOf<Session?>()
                 for (childSnapshot in snapshot.children) {
                     sessionList.add(childSnapshot.getValue<Session?>())
                 }
@@ -34,11 +33,11 @@ class DatabaseRepository(
 
             override fun onCancelled(error: DatabaseError) {
                 trySend(Resource.Error(error.message)).isFailure
+                close()
             }
 
         })
         sessionRef.addValueEventListener(listener)
-
         awaitClose {
             sessionRef.removeEventListener(listener)
         }
@@ -61,12 +60,15 @@ class DatabaseRepository(
                     return
                 }
 
-                trySend(Resource.Success(session)).isSuccess
-
-                if(session.isWin == true || session.isTie == true){
+                if(session.win == true || session.tie == true){
+                    trySend(Resource.Success(session)).isSuccess
                     close()
                     return
+                }else{
+                    trySend(Resource.Success(session)).isSuccess
                 }
+
+
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -223,30 +225,9 @@ class DatabaseRepository(
 
 
     fun updateSession(sessionKey: String, session: Session) {
-
         val firebaseRef = firebaseDatabase.reference.child(SESSIONS_PATH).child(sessionKey)
 
-        val newSession = Session(
-            sessionName = session.sessionName,
-            sessionPassword = session.sessionPassword,
-            player1 = session.player1,
-            player2 = session.player2,
-            playerCount = session.playerCount,
-            winner = session.winner,
-            isWin = session.isWin,
-            isTie = session.isTie,
-            board = session.board,
-            currentTurn = session.currentTurn,
-
-        )
-
-
-            firebaseRef.setValue(newSession).addOnSuccessListener {
-                firebaseRef.get().addOnSuccessListener {
-                    println(session.isWin)
-                    println("baza: ${it.getValue<Session>()?.isWin}")
-                }
-            }
+        firebaseRef.updateChildren(session.toMap())
 
     }
 

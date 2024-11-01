@@ -13,9 +13,9 @@ data class Session(
     val player1:Player? = null,
     val player2: Player? = null,
     val playerCount:Int = 0,
-    val isWin:Boolean? = null,
+    val win:Boolean? = null,
     val winner:Player? = null,
-    val isTie:Boolean? = null,
+    val tie:Boolean? = null,
     val board: List<String> = List(9) {""},
 ){
     @Exclude
@@ -27,9 +27,9 @@ data class Session(
             "player1" to player1,
             "player2" to player2,
             "playerCount" to playerCount,
-            "isWin" to isWin,
+            "win" to win,
             "winner" to winner,
-            "isTie" to isTie,
+            "tie" to tie,
             "board" to board
         )
     }

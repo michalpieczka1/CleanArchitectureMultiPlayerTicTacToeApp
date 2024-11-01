@@ -36,6 +36,11 @@ class LocalGameViewModel(
 
     init {
         viewModelScope.launch {
+            setPlayer()
+        }
+    }
+
+    private suspend fun setPlayer(){
             playerRepository.currentPlayer.collect{player ->
                 _uiState.update {
                     it.copy(
@@ -44,9 +49,7 @@ class LocalGameViewModel(
                     )
                 }
             }
-        }
     }
-
     fun onBoardClicked(indexClicked: Int) {
         if (uiState.value.board[indexClicked] == "" && uiState.value.isWin == null && uiState.value.isTie == null) {
             val oldBoard = uiState.value.board

@@ -14,7 +14,6 @@ import com.michal.tictactoeonline.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -29,9 +28,9 @@ class JoinSessionViewModel(
         setPlayer()
     }
 
-    private fun setPlayer(){
+    private fun setPlayer() {
         viewModelScope.launch {
-            playerRepository.currentPlayer.collect{ player ->
+            playerRepository.currentPlayer.collect { player ->
                 _uiState.update {
                     it.copy(
                         player = player
@@ -55,20 +54,23 @@ class JoinSessionViewModel(
         }
     }
 
-    fun joinSessionClick() {
+    fun joinSessionClick(onJoinedKey: (sessionKey) -> Unit) {
         viewModelScope.launch {
             databaseRepository.getSessionKeyByNameAndPassword(
                 sessionName = uiState.value.sessionName,
                 password = uiState.value.password
-            ).collect{ session ->
-                when(session){
+            ).collect { session ->
+                when (session) {
                     is Resource.Error -> {
                         _uiState.update {
                             it.copy(
-                                sessionResource = Resource.Error(session.data ?: AppConstants.UNKNOWN_ERROR)
+                                sessionResource = Resource.Error(
+                                    session.data ?: AppConstants.UNKNOWN_ERROR
+                                )
                             )
                         }
                     }
+
                     is Resource.Loading -> {
                         _uiState.update {
                             it.copy(
@@ -76,17 +78,21 @@ class JoinSessionViewModel(
                             )
                         }
                     }
+
                     is Resource.Success -> {
-                        _uiState.update {
-                        if(session.data==null){
-                           it.copy(
-                               sessionResource = Resource.Error(AppConstants.UNKNOWN_ERROR)
-                           )
-                        }else{
-                            it.copy(
-                                sessionResource = Resource.Success(session.data)
-                            )
-                        }
+                        if (session.data == null) {
+                            _uiState.update {
+                                it.copy(
+                                    sessionResource = Resource.Error(AppConstants.UNKNOWN_ERROR)
+                                )
+                            }
+                        } else {
+                            _uiState.update {
+                                it.copy(
+                                    sessionResource = Resource.Success(session.data)
+                                )
+                            }
+                            onJoinedKey(session.data)
                         }
                     }
                 }

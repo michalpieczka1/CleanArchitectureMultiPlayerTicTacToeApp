@@ -15,6 +15,7 @@ import com.michal.tictactoeonline.presentation.joinSession.JoinSessionComposable
 import com.michal.tictactoeonline.presentation.localGame.LocalGameComposable
 import com.michal.tictactoeonline.presentation.main.MainScreenComposable
 import com.michal.tictactoeonline.presentation.onlineGame.OnlineGameComposable
+import com.michal.tictactoeonline.presentation.publicSessions.PublicSessionsComposable
 import com.michal.tictactoeonline.presentation.register.RegisterComposable
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
@@ -64,6 +65,12 @@ fun TicTacToeApp(modifier: Modifier = Modifier){
                 OnlineGameComposable(
                     sessionKey = sessionKey.sessionKey,
                     onGoBack = { navController.navigate(MainScreen) }
+                )
+            }
+            composable<PublicSessionsScreen> {
+                PublicSessionsComposable(
+                    onGoBack = { navController.navigate(MainScreen) },
+                    onGoToSession = { navController.navigate(OnlineGameScreen(sessionKey = it)) }
                 )
             }
         }

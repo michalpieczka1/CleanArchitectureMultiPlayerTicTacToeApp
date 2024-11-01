@@ -1,22 +1,27 @@
 package com.michal.tictactoeonline.presentation.publicSessions
 
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,41 +34,46 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import com.michal.tictactoeonline.data.model.Player
+import com.michal.tictactoeonline.presentation.joinSession.sessionKey
+import com.michal.tictactoeonline.util.Resource
 import kotlinx.coroutines.delay
+
+typealias sessionKey = String
 
 @Composable
 fun PublicSessionsComposable(
     modifier: Modifier = Modifier,
-    player: Player,
     onGoBack: () -> Unit,
-    onGoToSession: () -> Unit,
+    onGoToSession: (sessionKey) -> Unit,
     publicSessionsViewModel: PublicSessionsViewModel = viewModel(
-        factory = PublicSessionsViewModel.provideFactory(player)
-    ),
-    navController: NavController
+        factory = PublicSessionsViewModel.provideFactory()
+    )
 ) {
     val uiState = publicSessionsViewModel.uiState.collectAsState()
-    Surface(modifier = modifier.fillMaxSize()) {
+    Surface(modifier = modifier.fillMaxSize().windowInsetsPadding(insets = WindowInsets.statusBars.also { WindowInsets.systemBars } )) {
+        Box(contentAlignment = Alignment.TopEnd){
+            IconButton(onClick = onGoBack) {
+                Icon(imageVector = Icons.Filled.Close, contentDescription = "close")
+            }
+        }
         Column(
             modifier = modifier.padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            when(val state = uiState.value){
-                is PublicSessionsUiState.Error -> {
+            when(val sessionResource = uiState.value.sessionResource){
+                is Resource.Error -> {
                     Text(
-                        text = "Error ${state.message} occurred",
+                        text = "Error ${sessionResource.message} occurred",
                         style = MaterialTheme.typography.displaySmall,
                         color = Color.Red
                     )
                 }
-                PublicSessionsUiState.Loading -> {
+                is Resource.Loading -> {
                     CircularProgressIndicator()
                 }
-                is PublicSessionsUiState.Success -> {
-                    if(state.sessions.isNullOrEmpty()){
+                is Resource.Success -> {
+                    if(uiState.value.sessions.isNullOrEmpty()){
                         Text(
                             text = "There are no public sessions right now :(",
                             style = MaterialTheme.typography.displaySmall
@@ -80,20 +90,20 @@ fun PublicSessionsComposable(
                         LazyColumn(
                             contentPadding = PaddingValues(16.dp)
                         ) {
-                            items(state.sessions, key = { it.sessionName }){ session ->
+                            items(uiState.value.sessions ?: listOf(), key = { it.sessionName }){ session ->
                                 LaunchedEffect(key1 = session.playerCount) {
                                     if(session.playerCount == 2){
-                                        delay(4000)
+                                        delay(2000)
                                         publicSessionsViewModel.removeSession(session)
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                                 SessionCard(
                                     session = session,
-                                    onClick = { onGoToSession() },
+                                    onClick = { publicSessionsViewModel.onSessionJoin(onGoToSession, session.sessionName, session.sessionPassword) },
                                     isRemoved = session.playerCount == 2,
                                     modifier = Modifier.animateItem(fadeOutSpec = tween(200,0, FastOutLinearInEasing))
-                                ) //TODO add navhost to onClick
+                                )
                             }
                         }
                     }
