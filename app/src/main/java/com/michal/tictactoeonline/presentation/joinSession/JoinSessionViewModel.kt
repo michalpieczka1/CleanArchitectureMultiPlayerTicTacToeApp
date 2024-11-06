@@ -65,7 +65,7 @@ class JoinSessionViewModel(
                         _uiState.update {
                             it.copy(
                                 sessionResource = Resource.Error(
-                                    session.data ?: AppConstants.UNKNOWN_ERROR
+                                    session.message ?: AppConstants.UNKNOWN_ERROR
                                 )
                             )
                         }

@@ -14,6 +14,7 @@ data class Session(
     val player2: Player? = null,
     val playerCount:Int = 0,
     val win:Boolean? = null,
+    val playerLeft:Boolean = false,
     val winner:Player? = null,
     val tie:Boolean? = null,
     val board: List<String> = List(9) {""},
@@ -28,6 +29,7 @@ data class Session(
             "player2" to player2,
             "playerCount" to playerCount,
             "win" to win,
+            "playerLeft" to playerLeft,
             "winner" to winner,
             "tie" to tie,
             "board" to board

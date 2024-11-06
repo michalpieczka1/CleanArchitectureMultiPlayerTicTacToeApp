@@ -21,14 +21,15 @@ class DatabaseRepository(
     fun observeAllSessions(): Flow<Resource<List<Session>>> = callbackFlow {
         trySend(Resource.Loading())
         val sessionRef = firebaseDatabase.reference.child(SESSIONS_PATH)
+        val sessionList = mutableListOf<Session?>()
 
         val listener = (object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val sessionList = mutableSetOf<Session?>()
+                sessionList.clear()
                 for (childSnapshot in snapshot.children) {
                     sessionList.add(childSnapshot.getValue<Session?>())
                 }
-                trySend(Resource.Success(sessionList.filterNotNull().toList())).isSuccess
+                trySend(Resource.Success(sessionList.filterNotNull())).isSuccess
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -133,6 +134,9 @@ class DatabaseRepository(
                         }
                         trySend(Resource.Success(sessionKey)).isSuccess
                         close()
+                    }else{
+                        trySend(Resource.Error("Session not found")).isFailure
+                        close()
                     }
                 }
             }
@@ -198,7 +202,6 @@ class DatabaseRepository(
                                 )
                             ).isFailure
                             close()
-
                         }
                 }
                 .addOnFailureListener { error ->

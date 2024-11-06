@@ -13,6 +13,7 @@ composeBom = "2024.10.00"
 googleGmsGoogleServices = "4.4.2"
 firebaseDatabase = "21.0.0"
 composeNavigation = "2.8.3"
+mockk = "1.13.13"
 serialization = "1.6.0"
 uiTextGoogleFonts = "1.7.3"
 konfetti-compose = "2.0.4"
@@ -35,6 +36,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }

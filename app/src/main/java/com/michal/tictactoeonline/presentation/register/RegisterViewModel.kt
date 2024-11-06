@@ -1,6 +1,5 @@
 package com.michal.tictactoeonline.presentation.register
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -9,12 +8,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.michal.tictactoeonline.AppConstants
 import com.michal.tictactoeonline.data.PlayerRepository
-import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.di.TicTacToeApplication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -30,7 +27,10 @@ class RegisterViewModel(
 
     fun onUsernameChange(username:String){
         _state.update {
-            it.copy(username = username)
+            it.copy(
+                username = username,
+                isButtonClicked = false
+            )
         }
     }
 
@@ -40,13 +40,21 @@ class RegisterViewModel(
         }
     }
 
-    fun onRegisterClick(){
+    fun onRegisterClick(nextScreenNavigate:() -> Unit){
+        _state.update {
+            it.copy(
+                isButtonClicked = true
+            )
+        }
         val isUsernameValid = state.value.username.isNotBlank()
         if(!isUsernameValid){
             _state.update {
                 it.copy(usernameError = AppConstants.EMPTY_USERNAME)
             }
         }else{
+            _state.update {
+                it.copy(usernameError = null)
+            }
             val uid = java.util.UUID.randomUUID().toString()
 
             viewModelScope.launch {
@@ -55,6 +63,7 @@ class RegisterViewModel(
                 playerRepository.saveUID(uid)
                 playerRepository.saveSymbol("X")
             }
+            nextScreenNavigate()
         }
     }
 

@@ -1,7 +1,9 @@
 package com.michal.tictactoeonline.presentation.publicSessions
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
@@ -18,7 +19,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.michal.tictactoeonline.presentation.joinSession.sessionKey
 import com.michal.tictactoeonline.util.Resource
-import kotlinx.coroutines.delay
 
 typealias sessionKey = String
 
@@ -50,10 +49,12 @@ fun PublicSessionsComposable(
     )
 ) {
     val uiState = publicSessionsViewModel.uiState.collectAsState()
-    Surface(modifier = modifier.fillMaxSize().windowInsetsPadding(insets = WindowInsets.statusBars.also { WindowInsets.systemBars } )) {
+    Surface(modifier = modifier
+        .fillMaxSize()
+        .windowInsetsPadding(insets = WindowInsets.statusBars.also { WindowInsets.systemBars })) {
         Box(contentAlignment = Alignment.TopEnd){
             IconButton(onClick = onGoBack) {
-                Icon(imageVector = Icons.Filled.Close, contentDescription = "close")
+                Icon(imageVector = Icons.Filled.Home, contentDescription = "close")
             }
         }
         Column(
@@ -73,7 +74,7 @@ fun PublicSessionsComposable(
                     CircularProgressIndicator()
                 }
                 is Resource.Success -> {
-                    if(uiState.value.sessions.isNullOrEmpty()){
+                    if(uiState.value.sessions.isEmpty()){
                         Text(
                             text = "There are no public sessions right now :(",
                             style = MaterialTheme.typography.displaySmall
@@ -90,20 +91,22 @@ fun PublicSessionsComposable(
                         LazyColumn(
                             contentPadding = PaddingValues(16.dp)
                         ) {
-                            items(uiState.value.sessions ?: listOf(), key = { it.sessionName }){ session ->
-                                LaunchedEffect(key1 = session.playerCount) {
-                                    if(session.playerCount == 2){
-                                        delay(2000)
-                                        publicSessionsViewModel.removeSession(session)
-                                    }
-                                }
+                            items(uiState.value.sessions){ session ->
                                 Spacer(modifier = Modifier.height(16.dp))
-                                SessionCard(
-                                    session = session,
-                                    onClick = { publicSessionsViewModel.onSessionJoin(onGoToSession, session.sessionName, session.sessionPassword) },
-                                    isRemoved = session.playerCount == 2,
-                                    modifier = Modifier.animateItem(fadeOutSpec = tween(200,0, FastOutLinearInEasing))
-                                )
+                                //todo make this animation work
+                                AnimatedVisibility(
+                                    visible = session.playerCount < 2 || session.playerCount == 2,
+                                    exit = fadeOut(
+                                        animationSpec = tween(durationMillis = 2000)
+                                    )
+                                ){
+                                    SessionCard(
+                                        session = session,
+                                        onClick = { publicSessionsViewModel.onSessionJoin(onGoToSession, session.sessionName, session.sessionPassword) },
+                                        isRemoved = session.playerCount == 2,
+                                        modifier = Modifier.animateItem(fadeOutSpec = tween(200,0, FastOutLinearInEasing))
+                                    )
+                                }
                             }
                         }
                     }

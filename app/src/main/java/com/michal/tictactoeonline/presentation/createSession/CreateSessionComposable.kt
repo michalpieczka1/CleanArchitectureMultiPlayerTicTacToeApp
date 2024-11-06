@@ -8,12 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.presentation.CardTemplate
 import com.michal.tictactoeonline.util.Resource
 
@@ -99,7 +93,7 @@ fun CreateSessionContent(
         }
         when(val result = state.value.resultResource){
             is Resource.Error -> Text(text = result.message ?: "Unknown error")
-            is Resource.Loading -> CircularProgressIndicator()
+            is Resource.Loading -> {}
             is Resource.Success -> Text(text = "Udane")
         }
     }

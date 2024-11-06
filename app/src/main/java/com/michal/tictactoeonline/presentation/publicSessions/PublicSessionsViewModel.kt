@@ -22,9 +22,9 @@ import kotlinx.coroutines.launch
 class PublicSessionsViewModel(
     private var databaseRepository: DatabaseRepository,
     private var playerRepository: PlayerRepository,
-) :ViewModel() {
+) : ViewModel() {
     private val _uiState = MutableStateFlow<PublicSessionsUiState>(PublicSessionsUiState())
-    val uiState:StateFlow<PublicSessionsUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<PublicSessionsUiState> = _uiState.asStateFlow()
 
     companion object {
         fun provideFactory(
@@ -37,7 +37,7 @@ class PublicSessionsViewModel(
                     PublicSessionsViewModel(
                         databaseRepository = dbRepository,
                         playerRepository = playerRepository
-                        )
+                    )
                 }
             }
         }
@@ -45,100 +45,114 @@ class PublicSessionsViewModel(
 
     init {
         viewModelScope.launch {
-        setPlayer()
-        observeAllSessions()
+            setPlayer()
+            observeAllSessions()
         }
     }
 
-    private suspend fun setPlayer(){
-            playerRepository.currentPlayer.first{player ->
-                _uiState.update {
-                    it.copy(
-                        player = player
-                    )
-                }
-                true
-            }
-    }
-
-    fun removeSession(session: Session){
+    private suspend fun setPlayer() {
+        playerRepository.currentPlayer.first { player ->
             _uiState.update {
                 it.copy(
-                    sessions = it.sessions?.filter { element -> element != session }
+                    player = player
                 )
             }
+            true
+        }
     }
 
-    private suspend fun observeAllSessions(){
-            databaseRepository.observeAllSessions().collect{ sessionsResource ->
-                when(sessionsResource){
-                    is Resource.Error -> {
-                        _uiState.update {
-                            it.copy(
-                                sessions = null,
-                                sessionResource = Resource.Error(sessionsResource.message ?: AppConstants.UNKNOWN_ERROR)
-                            )
-                        }
-                    }
+    fun removeSession(session: Session) {
+        _uiState.update {
+            it.copy(
+                sessions = it.sessions.filter { element -> element != session }
+            )
+        }
+    }
 
-                    is Resource.Loading -> {
-                        _uiState.update {
-                            it.copy(
-                                sessionResource = Resource.Loading()
+    private suspend fun observeAllSessions() {
+        databaseRepository.observeAllSessions().collect { sessionsResource ->
+            when (sessionsResource) {
+                is Resource.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            sessions = emptyList(),
+                            sessionResource = Resource.Error(
+                                sessionsResource.message ?: AppConstants.UNKNOWN_ERROR
                             )
-                        }
-                    }
-
-                    is Resource.Success -> {
-                        val sessions = sessionsResource.data
-                        _uiState.update {
-                            it.copy(
-                                sessions = sessions,
-                                sessionResource = Resource.Success(true)
-                            )
-                        }
+                        )
                     }
                 }
-            }
-    }
 
-    fun onSessionJoin(navigationJoinMethod: (sessionKey) -> Unit, sessionName:String, sessionPassword: String){
-        viewModelScope.launch {
-            databaseRepository.getSessionKeyByNameAndPassword(sessionName,sessionPassword).collect{ sessionResource ->
-                when(sessionResource){
-                    is Resource.Error -> {
-                        _uiState.update {
-                            it.copy(
-                                sessionResource = Resource.Error(sessionResource.message ?: AppConstants.UNKNOWN_ERROR)
-                            )
-                        }
+                is Resource.Loading -> {
+                    _uiState.update {
+                        it.copy(
+                            sessionResource = Resource.Loading()
+                        )
                     }
-                    is Resource.Loading -> {
-                        _uiState.update {
-                            it.copy(
-                                sessionResource = Resource.Loading()
-                            )
-                        }
-                    }
-                    is Resource.Success -> {
-                        if (sessionResource.data == null) {
-                            _uiState.update {
-                                it.copy(
-                                    sessionResource = Resource.Error("Error joining the session")
-                                )
-                            }
-                        }else{
-                            _uiState.update {
-                                it.copy(
-                                    sessionResource = Resource.Success(true)
-                                )
-                            }
-                            navigationJoinMethod(sessionResource.data)
-                        }
+                }
+
+                is Resource.Success -> {
+                    val sessions = sessionsResource.data
+
+                    _uiState.update {
+                        it.copy(
+                            sessions = sessions?.filter { element -> element.playerCount < 2 && element.sessionPassword.isBlank()}
+                                ?: emptyList(),
+                            sessionResource = Resource.Success(true)
+                        )
                     }
                 }
             }
         }
     }
 
+
+
+    fun onSessionJoin(
+        navigationJoinMethod: (sessionKey) -> Unit,
+        sessionName: String,
+        sessionPassword: String
+    ) {
+        viewModelScope.launch {
+            databaseRepository.getSessionKeyByNameAndPassword(sessionName, sessionPassword)
+                .collect { sessionResource ->
+                    when (sessionResource) {
+                        is Resource.Error -> {
+                            _uiState.update {
+                                it.copy(
+                                    sessionResource = Resource.Error(
+                                        sessionResource.message ?: AppConstants.UNKNOWN_ERROR
+                                    )
+                                )
+                            }
+                        }
+
+                        is Resource.Loading -> {
+                            _uiState.update {
+                                it.copy(
+                                    sessionResource = Resource.Loading()
+                                )
+                            }
+                        }
+
+                        is Resource.Success -> {
+                            if (sessionResource.data == null) {
+                                _uiState.update {
+                                    it.copy(
+                                        sessionResource = Resource.Error("Error joining the session")
+                                    )
+                                }
+                            } else {
+                                _uiState.update {
+                                    it.copy(
+                                        sessionResource = Resource.Success(true)
+                                    )
+                                }
+                                navigationJoinMethod(sessionResource.data)
+                            }
+                        }
+                    }
+                }
+        }
+    }
 }

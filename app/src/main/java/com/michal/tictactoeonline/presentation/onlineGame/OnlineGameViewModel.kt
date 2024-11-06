@@ -52,13 +52,13 @@ class OnlineGameViewModel(
             setCurrentTurn()
             updateSession()
 
+            updateWinCount()
             observeSession()
         }
     }
 
 
     private suspend fun observeSession() {
-        println("5")
         databaseRepository.observeSessionByKey(sessionKey = sessionKey).collect { session ->
             when (session) {
                 is Resource.Error -> {
@@ -93,7 +93,6 @@ class OnlineGameViewModel(
     }
 
     private suspend fun getSession() {
-        println("1")
         when (val session = databaseRepository.getSessionByKey(sessionKey = sessionKey).last()) {
             is Resource.Error -> {
                 _uiState.update {
@@ -126,7 +125,6 @@ class OnlineGameViewModel(
     }
 
     private suspend fun setPlayers() {
-        println("2")
         playerRepository.currentPlayer.first { player ->
             if (_uiState.value.session.player1 == null) {
                 _uiState.update {
@@ -155,21 +153,18 @@ class OnlineGameViewModel(
     }
 
     private fun updateSession() {
-        println("4")
         databaseRepository.updateSession(sessionKey, uiState.value.session)
     }
 
-    private fun updateWinCount() {
-        viewModelScope.launch {
-            if (uiState.value.session.currentTurn == playerRepository.currentPlayer.first()) {
+
+    private suspend fun updateWinCount() {
+            if (uiState.value.session.winner == playerRepository.currentPlayer.first()) {
                 val currentWinCount = playerRepository.currentWinCount.first()
                 playerRepository.saveWinCount(currentWinCount.toInt() + 1)
             }
-        }
     }
 
     private fun setCurrentTurn() {
-        println("3")
         if (uiState.value.session.player2 != null) {
             val newCurrentPlayer =
                 if (uiState.value.session.currentTurn == uiState.value.session.player1) {
@@ -221,9 +216,7 @@ class OnlineGameViewModel(
                             )
                         }
                     }
-                    if (hasWon) {
-                        updateWinCount()
-                    } else if (!isTie) {
+                    if (!isTie && !hasWon) {
                         setCurrentTurn()
                     }
                     updateSession()
@@ -232,9 +225,6 @@ class OnlineGameViewModel(
         }
     }
 
-    private fun isEnded(): Boolean {
-        return (uiState.value.session.win == true || uiState.value.session.tie == true)
-    }
 
     private fun isWin(indexClicked: Int): Boolean {
         val board = uiState.value.session.board
@@ -283,4 +273,41 @@ class OnlineGameViewModel(
     private fun isBoardFilled(): Boolean {
         return uiState.value.session.board.all { it != "" }
     }
+
+    fun onGoBackClick(onGoBackNavigation: () -> Unit){
+        viewModelScope.launch {
+            if(uiState.value.session.winner != null){
+                playerRepository.currentPlayer.first { player ->
+                    if(uiState.value.session.player1 == player){
+                        _uiState.update {
+                            it.copy(
+                                session = it.session.copy(
+                                    win = true,
+                                    tie = false,
+                                    winner = it.session.player2,  //the other player is the winner
+                                    playerLeft = true
+                                )
+                            )
+                        }
+                    }else{
+                        _uiState.update {
+                            it.copy(
+                                session = it.session.copy(
+                                    win = true,
+                                    tie = false,
+                                    winner = it.session.player1,
+                                    playerLeft = true
+                                )
+                            )
+                        }
+                    }
+
+                    true
+                }
+                updateSession()
+            }
+        }
+        onGoBackNavigation()
+    }
+
 }
