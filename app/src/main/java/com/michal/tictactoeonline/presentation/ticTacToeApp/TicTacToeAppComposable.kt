@@ -1,5 +1,11 @@
 package com.michal.tictactoeonline.presentation.ticTacToeApp
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideIn
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,7 +30,17 @@ import kotlinx.serialization.Serializable
 fun TicTacToeApp(modifier: Modifier = Modifier){
     val navController = rememberNavController()
     Surface(content = {
-        NavHost(navController = navController, startDestination = RegisterScreen) {
+        NavHost(
+            navController = navController,
+            startDestination = RegisterScreen,
+            enterTransition = {
+                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, animationSpec = tween(300))
+            },
+            exitTransition = {slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End, animationSpec = tween(300))},
+            popEnterTransition = { fadeIn(tween(200)) },
+            popExitTransition = { fadeOut(tween(200)) },
+
+        ) {
             composable<RegisterScreen> {
                 RegisterComposable(
                     modifier = modifier,

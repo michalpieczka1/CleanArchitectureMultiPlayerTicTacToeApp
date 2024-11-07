@@ -96,7 +96,7 @@ class PublicSessionsViewModel(
 
                     _uiState.update {
                         it.copy(
-                            sessions = sessions?.filter { element -> element.playerCount < 2 && element.sessionPassword.isBlank()}
+                            sessions = sessions?.filter { element -> element.playerCount < 2 && element.sessionPassword.isBlank() && element.win == null }
                                 ?: emptyList(),
                             sessionResource = Resource.Success(true)
                         )

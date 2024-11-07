@@ -136,14 +136,12 @@ class DatabaseRepository(
                         close()
                     }else{
                         trySend(Resource.Error("Session not found")).isFailure
-                        close()
                     }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
                 trySend(Resource.Error(error.message)).isFailure
-                close()
             }
 
         })
@@ -153,7 +151,7 @@ class DatabaseRepository(
             sessionRef.removeEventListener(listener)
         }
     }
-
+    //todo fix sync with user lag
     fun createSession(
         sessionName: String,
         password: String?

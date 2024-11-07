@@ -53,7 +53,9 @@ fun JoinSessionContent(modifier: Modifier = Modifier, viewModel: JoinSessionView
         Spacer(modifier = Modifier.height(4.dp))
         TextField(
             value = state.value.sessionName,
-            onValueChange = { viewModel.onSessionNameChange(it) })
+            onValueChange = { viewModel.onSessionNameChange(it) },
+            singleLine = true
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -61,7 +63,9 @@ fun JoinSessionContent(modifier: Modifier = Modifier, viewModel: JoinSessionView
         Spacer(modifier = Modifier.height(4.dp))
         TextField(
             value = state.value.password,
-            onValueChange = { viewModel.onPasswordChange(it) })
+            onValueChange = { viewModel.onPasswordChange(it) },
+            singleLine = true
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
