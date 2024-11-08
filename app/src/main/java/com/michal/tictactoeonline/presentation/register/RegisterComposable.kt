@@ -32,7 +32,7 @@ fun RegisterComposable(
     if (state.value.isUserAlreadyLogged) {
         onGoToNextScreen()
     } else {
-        val usernameError = state.value.usernameError != null && state.value.isButtonClicked
+        val isUsernameError = state.value.usernameError != null && state.value.isButtonClicked
 
         CardTemplate(title = "Hi, register pls :)", modifier = modifier.fillMaxSize(), Content = {
             Text(
@@ -42,7 +42,8 @@ fun RegisterComposable(
             TextField(
                 value = state.value.username,
                 onValueChange = { registerViewModel.onUsernameChange(it) },
-                isError = usernameError
+                isError = isUsernameError,
+                singleLine = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -52,7 +53,9 @@ fun RegisterComposable(
             )
             TextField(
                 value = state.value.password,
-                onValueChange = { registerViewModel.onPasswordChange(it) })
+                onValueChange = { registerViewModel.onPasswordChange(it) },
+                singleLine = true
+            )
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "* - required data",
@@ -63,7 +66,7 @@ fun RegisterComposable(
                         .padding(end = 64.dp)
                 )
             }
-            if (usernameError) {
+            if (isUsernameError) {
                 Text(
                     text = state.value.usernameError!!,
                     textAlign = TextAlign.Center,

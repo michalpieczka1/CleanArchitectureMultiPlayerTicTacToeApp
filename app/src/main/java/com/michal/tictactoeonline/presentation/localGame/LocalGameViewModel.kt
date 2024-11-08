@@ -36,16 +36,17 @@ class LocalGameViewModel(
 
     init {
         viewModelScope.launch {
-            setPlayer()
+            setPlayer1()
         }
     }
 
-    private suspend fun setPlayer(){
+    private suspend fun setPlayer1(){
+        playerRepository.saveSymbol("X")
             playerRepository.currentPlayer.collect{player ->
                 _uiState.update {
                     it.copy(
                         player = player,
-                        currentTurn = player
+                        currentTurn = player,
                     )
                 }
             }

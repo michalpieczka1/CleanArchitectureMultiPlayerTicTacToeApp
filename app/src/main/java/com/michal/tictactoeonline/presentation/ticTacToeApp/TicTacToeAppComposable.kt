@@ -1,15 +1,14 @@
 package com.michal.tictactoeonline.presentation.ticTacToeApp
 
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideIn
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,37 +23,24 @@ import com.michal.tictactoeonline.presentation.main.MainScreenComposable
 import com.michal.tictactoeonline.presentation.onlineGame.OnlineGameComposable
 import com.michal.tictactoeonline.presentation.publicSessions.PublicSessionsComposable
 import com.michal.tictactoeonline.presentation.register.RegisterComposable
-import com.michal.ui.theme.AppTheme
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
-
-@Serializable
-object RegisterScreen
-
-@Serializable
-object MainScreen
-
-@Serializable
-object LocalGameScreen
-
-@Serializable
-object CreateSessionScreen
-
-@Serializable
-object JoinSessionScreen
-
-@Serializable
-data class OnlineGameScreen(
-    val sessionKey: String,
-)
-@Serializable
-object PublicSessionsScreen
-
 @Composable
-fun TicTacToeApp(modifier: Modifier = Modifier, navController: NavHostController = rememberNavController()){
+fun TicTacToeApp(modifier: Modifier = Modifier){
+    val navController = rememberNavController()
     Surface(content = {
-        NavHost(navController = navController, startDestination = RegisterScreen) { //get transition
+        NavHost(
+            navController = navController,
+            startDestination = RegisterScreen,
+            enterTransition = {
+                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, animationSpec = tween(300))
+            },
+            exitTransition = {slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End, animationSpec = tween(300))},
+            popEnterTransition = { fadeIn(tween(200)) },
+            popExitTransition = { fadeOut(tween(200)) },
+
+        ) {
             composable<RegisterScreen> {
                 RegisterComposable(
                     modifier = modifier,
@@ -106,3 +92,25 @@ fun TicTacToeApp(modifier: Modifier = Modifier, navController: NavHostController
         }
     })
 }
+
+@Serializable
+object RegisterScreen
+
+@Serializable
+object MainScreen
+
+@Serializable
+object LocalGameScreen
+
+@Serializable
+object CreateSessionScreen
+
+@Serializable
+object JoinSessionScreen
+
+@Serializable
+data class OnlineGameScreen(
+    val sessionKey: String,
+)
+@Serializable
+object PublicSessionsScreen
