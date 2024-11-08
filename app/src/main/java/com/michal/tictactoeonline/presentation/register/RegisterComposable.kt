@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.michal.tictactoeonline.presentation.CardTemplate
+import com.michal.tictactoeonline.presentation.otherComposables.CardTemplate
 
 @Composable
 fun RegisterComposable(

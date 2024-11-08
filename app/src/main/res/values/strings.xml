@@ -10,4 +10,5 @@
     <string name="someone_turn">%1$s turn!</string>
     <string name="waiting_for_all_players">Waiting for all players...</string>
     <string name="you_win_because_player_left">You win because player left 🥳</string>
+    <string name="error_occurred">An error occurred!</string>
 </resources>

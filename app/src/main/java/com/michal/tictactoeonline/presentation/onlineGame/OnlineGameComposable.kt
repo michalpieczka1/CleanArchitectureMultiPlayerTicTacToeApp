@@ -33,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tictactoe.R
 import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.data.model.Session
+import com.michal.tictactoeonline.presentation.otherComposables.ErrorDialog
 import com.michal.tictactoeonline.util.Resource
 import com.michal.ui.theme.AppTheme
 import io.mockk.every
@@ -57,9 +58,12 @@ fun OnlineGameComposable(
     Surface(modifier = modifier.fillMaxSize()) {
 
 
-        when(state.value.sessionResource){
+        when(val result = state.value.sessionResource){
             is Resource.Error -> {
-
+                ErrorDialog(
+                    onErrorDismiss = onGoBack,
+                    errorMessage = result.message
+                )
             }
             is Resource.Loading -> {
 
@@ -159,7 +163,7 @@ fun OnlineGameComposable(
 //@PreviewScreenSizes
 //@PreviewLightDark
 @Composable
-fun OnlineGameComposablePreview(){
+fun OnlineGamePreview(){
     val mockViewModel = mockk<OnlineGameViewModel>()
 
     every {mockViewModel.uiState } returns MutableStateFlow(
@@ -170,6 +174,21 @@ fun OnlineGameComposablePreview(){
                 currentTurn = Player("player1", symbol = "X"),
             ),
             sessionResource = Resource.Success(true)
+        )
+    )
+    AppTheme{
+        OnlineGameComposable(sessionKey = "", onGoBack = { /*TODO*/ }, onlineGameViewModel = mockViewModel)
+    }
+}
+
+@Preview
+@Composable
+fun OnlineGameErrorPreview(){
+    val mockViewModel = mockk<OnlineGameViewModel>()
+
+    every {mockViewModel.uiState } returns MutableStateFlow(
+        OnlineGameUiState(
+            sessionResource = Resource.Error("Some error message")
         )
     )
     AppTheme{
