@@ -78,7 +78,7 @@ fun CreateSessionContent(
         Text(text = "Password", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(4.dp))
         TextField(
-            value = state.value.password,
+            value = state.value.sessionPassword,
             onValueChange = { viewModel.onPasswordChange(it) })
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -105,7 +105,9 @@ fun CreateSessionContent(
             is Resource.Error -> {
                 ErrorDialog(
                     onErrorDismiss = onErrorDismiss,
-                    onConfirm = { viewModel.createSessionClick(onSessionCreate) },
+                    onConfirm = {
+                        viewModel.onTryAgain()
+                    },
                     errorMessage = result.message
                 )
             }
@@ -125,6 +127,6 @@ fun CreateSessionErrorPreview(){
                 resultResource = Resource.Error("Error")
             )
         )
-        CreateSessionComposable(onCloseScreen = { /*TODO*/ }, onSessionCreate = {}, viewModel = mockViewModel)
+        CreateSessionComposable(onCloseScreen = {  }, onSessionCreate = {}, viewModel = mockViewModel)
     }
 }

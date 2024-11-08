@@ -39,55 +39,73 @@ class CreateSessionViewModel(
     fun onPasswordChange(newPassword: String) {
         _uiState.update {
             it.copy(
-                password = newPassword
+                sessionPassword = newPassword
+            )
+        }
+    }
+
+    fun onTryAgain(){
+        _uiState.update {
+            it.copy(
+                resultResource = Resource.Loading(),
+                sessionName = "",
+                sessionPassword = ""
             )
         }
     }
 
     fun createSessionClick(onSessionCreate: (String) -> Unit) {
-        viewModelScope.launch {
-            databaseRepository.createSession(
-                uiState.value.sessionName,
-                uiState.value.password
-            ).collect { createSessionResource ->
-                when (createSessionResource) {
-                    is Resource.Error -> {
-                        _uiState.update {
-                            it.copy(
-                                resultResource = Resource.Error(
-                                    createSessionResource.message ?: AppConstants.UNKNOWN_ERROR
-                                )
-                            )
-                        }
-                    }
-
-                    is Resource.Loading -> {
-                        _uiState.update {
-                            it.copy(
-                                resultResource = Resource.Loading()
-                            )
-                        }
-                    }
-
-                    is Resource.Success -> {
-                        if (createSessionResource.data != null) {
-                            val newSessionKey = createSessionResource.data
-                            sessionKey = newSessionKey
+        if(uiState.value.sessionName != ""){
+            viewModelScope.launch {
+                databaseRepository.createSession(
+                    uiState.value.sessionName,
+                    uiState.value.sessionPassword
+                ).collect { createSessionResource ->
+                    when (createSessionResource) {
+                        is Resource.Error -> {
                             _uiState.update {
                                 it.copy(
-                                    resultResource = Resource.Success(true)
+                                    resultResource = Resource.Error(
+                                        createSessionResource.message ?: AppConstants.UNKNOWN_ERROR
+                                    )
                                 )
                             }
-                            onSessionCreate(sessionKey)
-                        } else {
+                        }
+
+                        is Resource.Loading -> {
                             _uiState.update {
                                 it.copy(
-                                    resultResource = Resource.Error("Failed creating session.")
+                                    resultResource = Resource.Loading()
                                 )
+                            }
+                        }
+
+                        is Resource.Success -> {
+                            if (createSessionResource.data != null) {
+                                val newSessionKey = createSessionResource.data
+                                sessionKey = newSessionKey
+                                _uiState.update {
+                                    it.copy(
+                                        resultResource = Resource.Success(true)
+                                    )
+                                }
+                                onSessionCreate(sessionKey)
+                            } else {
+                                _uiState.update {
+                                    it.copy(
+                                        resultResource = Resource.Error("Failed creating session.")
+                                    )
+                                }
                             }
                         }
                     }
                 }
+            }
+        }else{
+            _uiState.update {
+                it.copy(
+                    resultResource = Resource.Error("Session name cannot be empty.")// TODO in future two different errors, if its hard error do dialog if not then error in ui.
+                )
             }
         }
     }

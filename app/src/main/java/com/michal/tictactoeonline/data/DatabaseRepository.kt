@@ -122,8 +122,8 @@ class DatabaseRepository(
         val listener = (object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (sessionSnapshot in snapshot.children) {
-                    if (sessionSnapshot.child("sessionName").getValue<String>().equals(sessionName)
-                        && sessionSnapshot.child("sessionPassword").getValue<String>().equals(password)
+                    if (sessionSnapshot.child("sessionName").value!! == sessionName
+                        && sessionSnapshot.child("sessionPassword").value!! == password
                     ) {
                         val sessionKey = sessionSnapshot.key
 
@@ -134,11 +134,10 @@ class DatabaseRepository(
                         }
                         trySend(Resource.Success(sessionKey)).isSuccess
                         close()
-                    }else{
-                        trySend(Resource.Error("Session not found")).isFailure
-                        close()
                     }
                 }
+                    trySend(Resource.Error("Session not found")).isFailure
+                    close()
             }
 
             override fun onCancelled(error: DatabaseError) {

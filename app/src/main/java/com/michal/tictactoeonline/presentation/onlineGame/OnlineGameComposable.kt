@@ -192,6 +192,6 @@ fun OnlineGameErrorPreview(){
         )
     )
     AppTheme{
-        OnlineGameComposable(sessionKey = "", onGoBack = { /*TODO*/ }, onlineGameViewModel = mockViewModel)
+        OnlineGameComposable(sessionKey = "", onGoBack = {  }, onlineGameViewModel = mockViewModel)
     }
 }

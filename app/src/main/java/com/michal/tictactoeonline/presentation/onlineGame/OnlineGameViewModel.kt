@@ -276,7 +276,7 @@ class OnlineGameViewModel(
 
     fun onGoBackClick(onGoBackNavigation: () -> Unit){
         viewModelScope.launch {
-            if(uiState.value.session.winner != null){
+            if(uiState.value.session.winner == null){
                 playerRepository.currentPlayer.first { player ->
                     if(uiState.value.session.player1 == player){
                         _uiState.update {
@@ -306,8 +306,7 @@ class OnlineGameViewModel(
                 }
                 updateSession()
             }
-        }
         onGoBackNavigation()
+        }
     }
-
 }

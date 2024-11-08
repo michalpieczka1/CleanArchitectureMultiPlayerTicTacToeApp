@@ -5,7 +5,7 @@ import com.michal.tictactoeonline.util.Resource
 
 data class JoinSessionUiState(
     val sessionName: String = "",
-    val password: String = "",
+    val sessionPassword: String = "",
     val player: Player = Player(),
-    val sessionResource: Resource<String> = Resource.Loading()
+    val resultResource: Resource<String> = Resource.Loading()
 )

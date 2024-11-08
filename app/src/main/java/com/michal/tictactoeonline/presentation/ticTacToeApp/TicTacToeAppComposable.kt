@@ -54,7 +54,7 @@ object PublicSessionsScreen
 @Composable
 fun TicTacToeApp(modifier: Modifier = Modifier, navController: NavHostController = rememberNavController()){
     Surface(content = {
-        NavHost(navController = navController, startDestination = RegisterScreen) {
+        NavHost(navController = navController, startDestination = RegisterScreen) { //get transition
             composable<RegisterScreen> {
                 RegisterComposable(
                     modifier = modifier,

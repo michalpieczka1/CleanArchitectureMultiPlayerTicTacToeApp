@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.michal.tictactoeonline.presentation.joinSession.sessionKey
+import com.michal.tictactoeonline.presentation.otherComposables.ErrorDialog
 import com.michal.tictactoeonline.util.Resource
 
 typealias sessionKey = String
@@ -64,10 +65,9 @@ fun PublicSessionsComposable(
         ) {
             when(val sessionResource = uiState.value.sessionResource){
                 is Resource.Error -> {
-                    Text(
-                        text = "Error ${sessionResource.message} occurred",
-                        style = MaterialTheme.typography.displaySmall,
-                        color = Color.Red
+                    ErrorDialog(
+                        onErrorDismiss = onGoBack,
+                        errorMessage = sessionResource.message
                     )
                 }
                 is Resource.Loading -> {

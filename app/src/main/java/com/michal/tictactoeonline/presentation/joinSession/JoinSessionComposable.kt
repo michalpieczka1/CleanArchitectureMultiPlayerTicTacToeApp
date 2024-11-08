@@ -68,7 +68,7 @@ fun JoinSessionContent(modifier: Modifier = Modifier, viewModel: JoinSessionView
         Text(text = "Password", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(4.dp))
         TextField(
-            value = state.value.password,
+            value = state.value.sessionPassword,
             onValueChange = { viewModel.onPasswordChange(it) })
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -90,11 +90,13 @@ fun JoinSessionContent(modifier: Modifier = Modifier, viewModel: JoinSessionView
         }) {
             Text(text = "Join", style = MaterialTheme.typography.titleLarge)
         }
-        when(val result = state.value.sessionResource){
+        when(val result = state.value.resultResource){
             is Resource.Error -> {
                 ErrorDialog(
                     onErrorDismiss = onErrorDismiss,
-                    onConfirm = { viewModel.joinSessionClick(onJoined) },
+                    onConfirm = {
+                        viewModel.onTryAgain()
+                    },
                     errorMessage = result.message
                 )
             }
@@ -111,9 +113,9 @@ fun JoinSessionErrorPreview(){
         val mockViewModel = mockk<JoinSessionViewModel>()
         every { mockViewModel.uiState } returns MutableStateFlow(
             JoinSessionUiState(
-                sessionResource = Resource.Error("Error joining lobby")
+                resultResource = Resource.Error("Error joining lobby")
             )
         )
-        JoinSessionComposable(onCloseScreen = { /*TODO*/ }, onJoined = {}, viewModel = mockViewModel)
+        JoinSessionComposable(onCloseScreen = {  }, onJoined = {}, viewModel = mockViewModel)
     }
 }

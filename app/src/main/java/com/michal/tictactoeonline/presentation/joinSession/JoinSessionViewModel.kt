@@ -49,7 +49,17 @@ class JoinSessionViewModel(
     fun onPasswordChange(newPassword: String) {
         _uiState.update {
             it.copy(
-                password = newPassword
+                sessionPassword = newPassword
+            )
+        }
+    }
+
+    fun onTryAgain(){
+        _uiState.update {
+            it.copy(
+                resultResource = Resource.Loading(),
+                sessionName = "",
+                sessionPassword = ""
             )
         }
     }
@@ -58,13 +68,13 @@ class JoinSessionViewModel(
         viewModelScope.launch {
             databaseRepository.getSessionKeyByNameAndPassword(
                 sessionName = uiState.value.sessionName,
-                password = uiState.value.password
+                password = uiState.value.sessionPassword
             ).collect { session ->
                 when (session) {
                     is Resource.Error -> {
                         _uiState.update {
                             it.copy(
-                                sessionResource = Resource.Error(
+                                resultResource = Resource.Error(
                                     session.message ?: AppConstants.UNKNOWN_ERROR
                                 )
                             )
@@ -74,7 +84,7 @@ class JoinSessionViewModel(
                     is Resource.Loading -> {
                         _uiState.update {
                             it.copy(
-                                sessionResource = Resource.Loading()
+                                resultResource = Resource.Loading()
                             )
                         }
                     }
@@ -83,13 +93,13 @@ class JoinSessionViewModel(
                         if (session.data == null) {
                             _uiState.update {
                                 it.copy(
-                                    sessionResource = Resource.Error(AppConstants.UNKNOWN_ERROR)
+                                    resultResource = Resource.Error(AppConstants.UNKNOWN_ERROR)
                                 )
                             }
                         } else {
                             _uiState.update {
                                 it.copy(
-                                    sessionResource = Resource.Success(session.data)
+                                    resultResource = Resource.Success(session.data)
                                 )
                             }
                             onJoinedKey(session.data)
