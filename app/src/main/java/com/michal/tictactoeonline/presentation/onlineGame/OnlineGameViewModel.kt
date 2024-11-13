@@ -183,6 +183,10 @@ class OnlineGameViewModel(
         }
     }
 
+    fun isEnded(): Boolean{
+        return uiState.value.session.win != null && uiState.value.session.tie != null
+    }
+
     fun updateBoard(indexClicked: Int) {
         if (uiState.value.session.board[indexClicked] == "" &&
             uiState.value.session.win == null &&

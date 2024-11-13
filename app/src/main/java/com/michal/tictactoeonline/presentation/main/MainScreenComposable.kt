@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,10 +77,10 @@ fun MainScreenComposable(
 
                         Card(
                             shape = RoundedCornerShape(8.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                             modifier = Modifier.shadow(
-                                8.dp,
-                                ambientColor = Color.Yellow,
+                                4.dp,
+                                spotColor = MaterialTheme.colorScheme.primaryContainer,
                                 clip = true,
                                 shape = RoundedCornerShape(8.dp)
                             )
@@ -87,14 +88,15 @@ fun MainScreenComposable(
                             Icon(
                                 painter = painterResource(id = R.drawable.trophy_24px),
                                 contentDescription = null,
-                                tint = Color.Yellow,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.size(iconSize)
                             )
                         }
                         Text(
                             text = "${playerState.value.winAmount}",
                             style = topAppBarFont,
-                            color = Color.Yellow
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 },

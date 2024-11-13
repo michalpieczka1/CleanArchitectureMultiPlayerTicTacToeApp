@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Button
@@ -27,6 +29,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -65,10 +68,8 @@ fun OnlineGameComposable(
                     errorMessage = result.message
                 )
             }
-            is Resource.Loading -> {
 
-            }
-            is Resource.Success -> {
+            is Resource.Success, is Resource.Loading -> {
                 if (state.value.session.win == true) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         KonfettiView(
@@ -110,25 +111,27 @@ fun OnlineGameComposable(
                             columns = GridCells.Fixed(3),
                             modifier = Modifier
                                 .aspectRatio(1f)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(0.dp),
-                            verticalArrangement = Arrangement.spacedBy(0.dp)
+                                .fillMaxWidth()
+                                .border(6.dp, MaterialTheme.colorScheme.primary),
                         ) {
                             items(state.value.session.board.size) { index ->
                                 Button(
                                     onClick = { onlineGameViewModel.updateBoard(index) },
                                     shape = RectangleShape,
                                     modifier = Modifier
+                                        .border(3.dp, MaterialTheme.colorScheme.primary)
                                         .aspectRatio(1f)
-                                        .border(4.dp, MaterialTheme.colorScheme.inversePrimary)
                                         .fillMaxSize(),
-                                    contentPadding = PaddingValues(2.dp)
+                                    contentPadding = PaddingValues(2.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                                 ) {
+                                    val textColor = if(state.value.session.board[index] == "X") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
                                     Text(
                                         text = state.value.session.board[index],
                                         fontSize = 32.sp,
                                         textAlign = TextAlign.Center,
-                                        maxLines = 1
+                                        maxLines = 1,
+                                        color = textColor
                                     )
                                 }
                             }
@@ -137,18 +140,31 @@ fun OnlineGameComposable(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.Center,
                     ) {
                         Button(
                             onClick = { onlineGameViewModel.onGoBackClick(onGoBack) },
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                            modifier = Modifier.fillMaxWidth(0.5f)
                         ) {
                             Text(
                                 text = "Go back",
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
+                        }
+                        Spacer(modifier = Modifier.width(32.dp))
+                        if(onlineGameViewModel.isEnded()){
+                            Button(
+                                onClick = { onlineGameViewModel.onGoBackClick(onGoBack) },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                            ) {
+                                Text(
+                                    text = "Play again",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.onTertiary,
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
                         }
                     }
                 }
@@ -159,7 +175,7 @@ fun OnlineGameComposable(
 
 }
 
-@Preview
+//@Preview
 //@PreviewScreenSizes
 //@PreviewLightDark
 @Composable
@@ -181,7 +197,7 @@ fun OnlineGamePreview(){
     }
 }
 
-@Preview
+//@Preview
 @Composable
 fun OnlineGameErrorPreview(){
     val mockViewModel = mockk<OnlineGameViewModel>()
@@ -191,6 +207,25 @@ fun OnlineGameErrorPreview(){
             sessionResource = Resource.Error("Some error message")
         )
     )
+    AppTheme{
+        OnlineGameComposable(sessionKey = "", onGoBack = {  }, onlineGameViewModel = mockViewModel)
+    }
+}
+
+@Preview
+@PreviewLightDark
+@Composable
+fun OnlineGameWinPreview(){
+    val mockViewModel = mockk<OnlineGameViewModel>()
+
+    every {mockViewModel.uiState } returns MutableStateFlow(
+        OnlineGameUiState(
+            sessionResource = Resource.Success(true),
+            session = Session(winner = Player("test"), win = true, tie = false)
+        )
+    )
+
+    every { mockViewModel.isEnded() } returns true
     AppTheme{
         OnlineGameComposable(sessionKey = "", onGoBack = {  }, onlineGameViewModel = mockViewModel)
     }

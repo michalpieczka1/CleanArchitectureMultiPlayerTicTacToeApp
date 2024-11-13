@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -94,28 +95,29 @@ fun LocalGameComposable(
                     columns = GridCells.Fixed(3),
                     modifier = Modifier
                         .aspectRatio(1f)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(0.dp),
-                    verticalArrangement = Arrangement.spacedBy(0.dp)
+                        .fillMaxWidth()
+                        .border(6.dp, MaterialTheme.colorScheme.primary),
                 ) {
                     items(state.value.board.size) { index ->
                         Button(
                             onClick = { localGameViewModel.onBoardClicked(index) },
                             shape = RectangleShape,
                             modifier = Modifier
+                                .border(3.dp, MaterialTheme.colorScheme.primary)
                                 .aspectRatio(1f)
-                                .border(4.dp, MaterialTheme.colorScheme.inversePrimary)
                                 .fillMaxSize(),
-                            contentPadding = PaddingValues(2.dp)
+                            contentPadding = PaddingValues(2.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
+                            val textColor = if(state.value.board[index] == "X") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
                             Text(
                                 text = state.value.board[index],
                                 fontSize = 32.sp,
                                 textAlign = TextAlign.Center,
-                                maxLines = 1
+                                maxLines = 1,
+                                color = textColor,
+                                fontWeight = FontWeight.Bold
                             )
-
-
                         }
                     }
                 }

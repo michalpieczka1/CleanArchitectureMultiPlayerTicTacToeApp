@@ -45,7 +45,7 @@ class LocalGameViewModel(
             playerRepository.currentPlayer.collect{player ->
                 _uiState.update {
                     it.copy(
-                        player = player,
+                        player1 = player,
                         currentTurn = player,
                     )
                 }
@@ -71,7 +71,7 @@ class LocalGameViewModel(
                         isTie = false,
                     )
                 }
-                if(uiState.value.currentTurn == uiState.value.player) updateWinCount()
+                if(uiState.value.currentTurn == uiState.value.player1) updateWinCount()
                 return
             } else if (isBoardFilled()) {
                 _uiState.update {
@@ -84,7 +84,7 @@ class LocalGameViewModel(
                 return
             }
             val newCurrentPlayer =
-                if (uiState.value.currentTurn == uiState.value.player) uiState.value.playerPC else uiState.value.player
+                if (uiState.value.currentTurn == uiState.value.player1) uiState.value.player2 else uiState.value.player1
             _uiState.update {
                 it.copy(
                     currentTurn = newCurrentPlayer
