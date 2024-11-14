@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -100,7 +101,14 @@ fun OnlineGameComposable(
                     }else{
                         stringResource(R.string.someone_turn, state.value.session.currentTurn?.username ?: "Unknown")
                     }
-
+                    
+                    Text(
+                        text = "Round ${state.value.session.round + 1}",
+                        style = MaterialTheme.typography.displaySmall,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = displayedText,
                         style = MaterialTheme.typography.displayMedium,
@@ -152,14 +160,14 @@ fun OnlineGameComposable(
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
                         }
-                        Spacer(modifier = Modifier.width(32.dp))
                         if(onlineGameViewModel.isEnded()){
+                        Spacer(modifier = Modifier.width(32.dp))
                             Button(
-                                onClick = { onlineGameViewModel.onGoBackClick(onGoBack) },
+                                onClick = { onlineGameViewModel.onPlayAgain() },
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                             ) {
                                 Text(
-                                    text = "Play again",
+                                    text = "Play again ${state.value.session.playAgainAcceptedCount} / 2",
                                     style = MaterialTheme.typography.headlineMedium,
                                     color = MaterialTheme.colorScheme.onTertiary,
                                     textAlign = TextAlign.Center,

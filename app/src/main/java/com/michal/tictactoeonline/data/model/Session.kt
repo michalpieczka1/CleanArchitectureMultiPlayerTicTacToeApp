@@ -16,8 +16,11 @@ data class Session(
     val win:Boolean? = null,
     val playerLeft:Boolean = false,
     val winner:Player? = null,
+    val winnerList:List<Player> = emptyList(),
     val tie:Boolean? = null,
     val board: List<String> = List(9) {""},
+    val round:Int = 0,
+    val playAgainAcceptedCount:Int = 0
 ){
     @Exclude
     fun toMap(): Map<String, Any?>{
@@ -31,8 +34,11 @@ data class Session(
             "win" to win,
             "playerLeft" to playerLeft,
             "winner" to winner,
+            "winnerList" to winnerList,
             "tie" to tie,
-            "board" to board
+            "board" to board,
+            "round" to round,
+            "playAgainAcceptedCount" to playAgainAcceptedCount
         )
     }
 }

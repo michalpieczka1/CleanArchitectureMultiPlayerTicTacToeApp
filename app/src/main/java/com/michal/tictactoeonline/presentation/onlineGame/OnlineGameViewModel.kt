@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.michal.tictactoeonline.AppConstants
 import com.michal.tictactoeonline.data.DatabaseRepository
 import com.michal.tictactoeonline.data.PlayerRepository
+import com.michal.tictactoeonline.data.model.Player
 import com.michal.tictactoeonline.data.model.Session
 import com.michal.tictactoeonline.di.TicTacToeApplication
 import com.michal.tictactoeonline.util.Resource
@@ -135,7 +136,6 @@ class OnlineGameViewModel(
                         )
                     )
                 }
-                playerRepository.saveSymbol("X")
             } else {
                 _uiState.update {
                     it.copy(
@@ -145,7 +145,6 @@ class OnlineGameViewModel(
                         )
                     )
                 }
-                playerRepository.saveSymbol("O")
 
             }
             true
@@ -158,7 +157,7 @@ class OnlineGameViewModel(
 
 
     private suspend fun updateWinCount() {
-            if (uiState.value.session.winner == playerRepository.currentPlayer.first()) {
+            if (uiState.value.session.winner?.uid == playerRepository.currentPlayer.first().uid) {
                 val currentWinCount = playerRepository.currentWinCount.first()
                 playerRepository.saveWinCount(currentWinCount.toInt() + 1)
             }
@@ -167,7 +166,7 @@ class OnlineGameViewModel(
     private fun setCurrentTurn() {
         if (uiState.value.session.player2 != null) {
             val newCurrentPlayer =
-                if (uiState.value.session.currentTurn == uiState.value.session.player1) {
+                if (uiState.value.session.currentTurn?.uid == uiState.value.session.player1?.uid) {
                     uiState.value.session.player2
                 } else {
                     uiState.value.session.player1
@@ -196,7 +195,7 @@ class OnlineGameViewModel(
                 val player = playerRepository.currentPlayer.first()
 
 
-                if (uiState.value.session.currentTurn == player) {
+                if (uiState.value.session.currentTurn?.uid == player.uid) {
 
                     val oldBoard = uiState.value.session.board
                     val newBoard = oldBoard.toMutableList()
@@ -311,6 +310,48 @@ class OnlineGameViewModel(
                 updateSession()
             }
         onGoBackNavigation()
+        }
+    }
+
+    fun onPlayAgain(){
+        if(uiState.value.session.playAgainAcceptedCount < 1){
+            _uiState.update {
+                it.copy(session = it.session.copy(
+                    playAgainAcceptedCount = it.session.playAgainAcceptedCount + 1
+                ))
+            }
+            updateSession()
+        }else{
+            val player2: Player
+            val player1: Player
+            if (uiState.value.session.player1?.symbol == "X"){
+                player1 = uiState.value.session.player1!!.copy(symbol = "O")
+                player2 = uiState.value.session.player2!!.copy(symbol = "X")
+            }else{
+                player1 = uiState.value.session.player1!!.copy(symbol = "X")
+                player2 = uiState.value.session.player2!!.copy(symbol = "O")
+            }
+
+            val winnerList:MutableList<Player> = uiState.value.session.winnerList.toMutableList()
+            uiState.value.session.winner?.let { winnerList.add(it) }
+            _uiState.update {
+                it.copy(
+                    session = it.session.copy(
+                        player1 = player2,
+                        player2 = player1,
+                        round = it.session.round + 1,
+                        win = null,
+                        tie = null,
+                        winner = null,
+                        winnerList = winnerList,
+                        board = Session().board,
+                        playAgainAcceptedCount = 0,
+                        currentTurn = player2
+                    )
+                )
+            }
+
+            updateSession()
         }
     }
 }

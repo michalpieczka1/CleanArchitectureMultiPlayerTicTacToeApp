@@ -61,14 +61,7 @@ class DatabaseRepository(
                     return
                 }
 
-                if(session.win == true || session.tie == true){
-                    trySend(Resource.Success(session)).isSuccess
-                    close()
-                    return
-                }else{
-                    trySend(Resource.Success(session)).isSuccess
-                }
-
+                trySend(Resource.Success(session)).isSuccess
 
             }
 
