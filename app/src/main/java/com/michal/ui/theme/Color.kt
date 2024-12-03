@@ -1,48 +1,50 @@
 package com.michal.ui.theme
 import androidx.compose.ui.graphics.Color
 
-val primaryLight = Color(0xFF8A2BE2)
-val onPrimaryLight = Color.White
+val LightPrimaryColor = Color(0xFF8E24AA)         // Light Purple
+val LightOnPrimary = Color(0xFFFFFFFF)            // White text on Primary
+val LightPrimaryContainer = Color(0xFFF3E5F5)     // Lighter Purple Container
+val LightOnPrimaryContainer = Color(0xFF4A0072)   // Dark Purple text on Container
 
-val primaryContainerLight = Color(0xFFD1BBE3)
-val onPrimaryContainerLight = Color(0xFF4B0082)
+val LightSecondaryColor = Color(0xFFFFFFFF)       // White for light theme
+val LightOnSecondary = Color(0xFF000000)          // Black text on Secondary
+val LightSecondaryContainer = Color(0xFFE0E0E0)   // Light Gray Container
+val LightOnSecondaryContainer = Color(0xFF303030) // Darker Gray text on Container
 
-val secondaryLight = Color(0xFFFFD700)
-val onSecondaryLight = Color(0xFF4A4A4A)
+val LightTertiaryColor = Color(0xFFF39C12)        // Light Orange
+val LightOnTertiary = Color(0xFFFFFFFF)           // Black text on Tertiary
+val LightTertiaryContainer = Color(0xFFFFE0B2)    // Light Orange Container
+val LightOnTertiaryContainer = Color(0xFF5D4037)  // Dark Brown text on Container
 
-val backgroundLight = Color(0xFFF3F1F5)
-val onBackgroundLight = Color(0xFF2C2C2C)
+val LightBackground = Color(0xFFF5F5F5)           // Light gray for background
+val LightOnBackground = Color(0xFF000000)         // Black text on Background
+val LightSurface = Color(0xFFFFFFFF)              // White for surface elements
+val LightOnSurface = Color(0xFF000000)            // Black text on Surface
+val LightSurfaceVariant = Color(0xFFE0E0E0)       // Light Gray Surface Variant
+val LightOnSurfaceVariant = Color(0xFF616161)     // Medium Gray text on Surface Variant
 
-val surfaceLight = Color.White
-val onSurfaceLight = Color(0xFF1E1E1E)
+val LightOutline = Color(0xFFBDBDBD)              // Light Gray for borders
 
-val outlineLight = Color(0xFFB0A5C6)
+val DarkPrimaryColor = Color(0xFF7B1FA2)          // Darker Purple
+val DarkOnPrimary = Color(0xFFFFFFFF)             // White text on Primary
+val DarkPrimaryContainer = Color(0xFF4A0072)      // Dark Purple Container
+val DarkOnPrimaryContainer = Color(0xFFE1BEE7)    // Lighter Purple text on Container
 
-val primaryDark = Color(0xFFBA55D3)
-val onPrimaryDark = Color.Black
+val DarkSecondaryColor = Color(0xFF000000)        // Black for dark theme
+val DarkOnSecondary = Color(0xFFFFFFFF)           // White text on Secondary
+val DarkSecondaryContainer = Color(0xFF424242)    // Dark Gray Container
+val DarkOnSecondaryContainer = Color(0xFFE0E0E0)  // Light Gray text on Container
 
-val primaryContainerDark = Color(0xFF5D3A72)
-val onPrimaryContainerDark = Color(0xFFD1BBE3)
+val DarkTertiaryColor = Color(0xFFD35400)         // Soft, muted Orange
+val DarkOnTertiary = Color(0xFF000000)            // Black text on Tertiary
+val DarkTertiaryContainer = Color(0xFF5D4037)     // Dark Brown Container
+val DarkOnTertiaryContainer = Color(0xFFFFCC80)   // Light Orange text on Container
 
-val secondaryDark = Color(0xFFF2B83C)
-val onSecondaryDark = Color(0xFF2E2E2E)
+val DarkBackground = Color(0xFF121212)            // Dark gray background
+val DarkOnBackground = Color(0xFFFFFFFF)          // White text on Background
+val DarkSurface = Color(0xFF1E1E1E)               // Darker surface color
+val DarkOnSurface = Color(0xFFFFFFFF)             // White text on Surface
+val DarkSurfaceVariant = Color(0xFF373737)        // Medium Gray Surface Variant
+val DarkOnSurfaceVariant = Color(0xFFBDBDBD)      // Light Gray text on Surface Variant
 
-val backgroundDark = Color(0xFF1A1A1A)
-val onBackgroundDark = Color(0xFFEAEAEA)
-
-val surfaceDark = Color(0xFF282828)
-val onSurfaceDark = Color(0xFFF5F5F5)
-
-val outlineDark = Color(0xFF75678A)
-
-val primaryLightMediumContrast = Color(0xFF9C27B0)
-val onPrimaryLightMediumContrast = Color.White
-
-val primaryDarkMediumContrast = Color(0xFFD68DF9)
-val onPrimaryDarkMediumContrast = Color.Black
-
-val primaryLightHighContrast = Color(0xFF6A1B9A)
-val onPrimaryLightHighContrast = Color.White
-
-val primaryDarkHighContrast = Color(0xFFE1A3F6)
-val onPrimaryDarkHighContrast = Color.Black
+val DarkOutline = Color(0xFF757575)
