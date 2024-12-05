@@ -48,3 +48,7 @@ val DarkSurfaceVariant = Color(0xFF373737)        // Medium Gray Surface Variant
 val DarkOnSurfaceVariant = Color(0xFFBDBDBD)      // Light Gray text on Surface Variant
 
 val DarkOutline = Color(0xFF757575)
+
+val LoginColor = Color(0xFF4cd137)
+
+val RegisterColor = Color(0xFF386CEC)

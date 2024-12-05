@@ -1,9 +1,14 @@
 package com.michal.tictactoeonline.common.presentation.ticTacToeApp
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,23 +34,43 @@ fun TicTacToeApp(modifier: Modifier = Modifier){
             navController = navController,
             startDestination = RegisterScreen,
             enterTransition = {
-                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, animationSpec = tween(300))
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> fullWidth }, // Slide from right to left
+                    animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                ) + fadeIn(animationSpec = tween(durationMillis = 300))
             },
-            exitTransition = {slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End, animationSpec = tween(300))},
-            popEnterTransition = { fadeIn(tween(200)) },
-            popExitTransition = { fadeOut(tween(200)) },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> -fullWidth }, // Slide to the left
+                    animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                ) + fadeOut(animationSpec = tween(durationMillis = 300))
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> -fullWidth }, // Slide in from the left
+                    animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                ) + fadeIn(animationSpec = tween(durationMillis = 300))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> fullWidth }, // Slide to the right
+                    animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                ) + fadeOut(animationSpec = tween(durationMillis = 300))
+            },
 
         ) {
             composable<RegisterScreen> {
                 RegisterComposable(
                     modifier = modifier,
-                    onGoToNextScreen = { navController.navigate(MainScreen) }
+                    onGoToNextScreen = { navController.navigate(MainScreen) },
+                    onGoToLoginScreen = { navController.navigate(LoginScreen) }
                 )
             }
             composable<LoginScreen> {
                 LoginComposable(
                     modifier = modifier,
-                    onGoToNextScreen = { navController.navigate(MainScreen) }
+                    onGoToNextScreen = { navController.navigate(MainScreen) },
+                    onGoToRegisterScreen = { navController.navigate(RegisterScreen) }
                 )
             }
             composable<MainScreen> {
