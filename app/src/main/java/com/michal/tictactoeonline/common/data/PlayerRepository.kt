@@ -1,5 +1,6 @@
 package com.michal.tictactoeonline.common.data
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
 class PlayerRepository(private val dataStore: DataStore<Preferences>) {
@@ -71,14 +73,15 @@ class PlayerRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun doesPlayerExist(): Boolean {
         return dataStore.data.map { preferences ->
-            preferences.contains(USERNAME)
-                    && preferences.contains(PASSWORD)
-                    && preferences.contains(UID)
-                    && preferences.contains(SYMBOL)
-                    && preferences.contains(WIN_COUNT)
-                    && preferences.contains(IN_GAME)
-        }.first()
+            // Log the actual preferences content
+            Log.d("PlayerRepository", "Preferences: $preferences")
+
+            listOf(USERNAME, PASSWORD, UID, SYMBOL, WIN_COUNT, IN_GAME).all { key ->
+                preferences.contains(key)
+            }
+        }.firstOrNull() ?: false
     }
+
 
     suspend fun clearData() {
         dataStore.edit {

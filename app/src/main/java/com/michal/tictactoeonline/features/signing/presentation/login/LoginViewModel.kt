@@ -15,6 +15,7 @@ import com.michal.tictactoeonline.features.signing.data.PlayersDBRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -93,6 +94,8 @@ class LoginViewModel(
                         playerRepository.savePassword(state.value.password)
                         playerRepository.saveUID(resource.data?.uid!!)
                         playerRepository.saveSymbol(resource.data.symbol!!)
+                        playerRepository.saveInGame(resource.data.inGame)
+                        playerRepository.saveWinCount(resource.data.winAmount)
                         nextScreenNavigate()
                     }
                 }

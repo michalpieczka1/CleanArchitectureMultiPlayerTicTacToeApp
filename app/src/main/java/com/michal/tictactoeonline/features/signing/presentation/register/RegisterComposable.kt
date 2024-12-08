@@ -9,8 +9,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountBox
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -26,12 +30,13 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.michal.tictactoeonline.common.presentation.otherComposables.CardTemplate
+import com.michal.tictactoeonline.common.presentation.otherComposables.CustomOutlinedTextField
 import com.michal.ui.theme.AppTheme
 import com.michal.ui.theme.RegisterColor
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
-
+//todo show errors and if user set password show dialog if he really wants to create acc without password
 @Composable
 fun RegisterComposable(
     modifier: Modifier = Modifier,
@@ -59,6 +64,7 @@ fun RegisterComposable(
                     Text(
                         text = "Welcome 👋",
                         style = MaterialTheme.typography.displayLarge,
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                     Text(
                         text = "Signup to create your account",
@@ -72,45 +78,18 @@ fun RegisterComposable(
             CardTemplate(title = "Sign Up",containerColor = RegisterColor, modifier = Modifier
                 .fillMaxWidth(),
                 Content = {
-                    Text(
-                        text = "Username",
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    OutlinedTextField(
+                    CustomOutlinedTextField(
                         value = state.value.username,
                         onValueChange = { registerViewModel.onUsernameChange(it) },
                         isError = isUsernameError,
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = MaterialTheme.colorScheme.secondary,
-                            unfocusedTextColor = MaterialTheme.colorScheme.secondary,
-                            focusedBorderColor = MaterialTheme.colorScheme.secondary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
-                            disabledBorderColor = MaterialTheme.colorScheme.secondary,
-                            errorBorderColor = MaterialTheme.colorScheme.error,
-                            cursorColor = MaterialTheme.colorScheme.secondary,
-                        ),
-
-                        )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Password",
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    OutlinedTextField(
-                        value = state.value.password,
-                        onValueChange = { registerViewModel.onPasswordChange(it) },
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = MaterialTheme.colorScheme.secondary,
-                            unfocusedTextColor = MaterialTheme.colorScheme.secondary,
-                            focusedBorderColor = MaterialTheme.colorScheme.secondary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
-                            disabledBorderColor = MaterialTheme.colorScheme.secondary,
-                            errorBorderColor = MaterialTheme.colorScheme.error,
-                            cursorColor = MaterialTheme.colorScheme.secondary,
-                        ),
+                        label = {
+                            Text(
+                                text = "Username",
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = { Icon(imageVector = Icons.Outlined.AccountBox, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary) }
                     )
                     if (isUsernameError) {
                         Text(
@@ -120,7 +99,24 @@ fun RegisterComposable(
                             color = MaterialTheme.colorScheme.error
                         )
                     }
+
                     Spacer(modifier = Modifier.height(16.dp))
+                    //TODO add password textfield
+                    CustomOutlinedTextField(
+                        value = state.value.password,
+                        onValueChange = { registerViewModel.onPasswordChange(it) },
+                        label = {
+                            Text(
+                                text = "Password",
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = { Icon(imageVector = Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary) }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth()
@@ -129,7 +125,7 @@ fun RegisterComposable(
                             onClick = {
                                 registerViewModel.onRegisterClick(onGoToNextScreen)
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                             modifier = Modifier.fillMaxWidth(0.8f)
                         ) {
                             Text(

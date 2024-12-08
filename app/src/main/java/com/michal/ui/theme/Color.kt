@@ -1,4 +1,5 @@
 package com.michal.ui.theme
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 val LightPrimaryColor = Color(0xFF8E24AA)         // Light Purple
@@ -52,3 +53,17 @@ val DarkOutline = Color(0xFF757575)
 val LoginColor = Color(0xFF4cd137)
 
 val RegisterColor = Color(0xFF386CEC)
+
+val LightGradientBrush = Brush.radialGradient(
+    colors = listOf(
+        LightOnPrimaryContainer,
+        LightPrimaryColor
+    )
+)
+
+val DarkGradientBrush = Brush.radialGradient(
+    colors = listOf(
+        DarkOnPrimaryContainer,
+        DarkPrimaryColor
+    )
+)

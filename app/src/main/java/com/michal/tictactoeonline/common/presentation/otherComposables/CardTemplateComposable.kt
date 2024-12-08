@@ -38,38 +38,34 @@ fun CardTemplate(
     onClose: (() -> Unit)? = null,
     containerColor: Color = MaterialTheme.colorScheme.tertiary
 ) {
-        Card(
-            modifier = modifier,
-            colors = CardDefaults.cardColors(containerColor = containerColor),
-            shape = RoundedCornerShape(topStart = 64.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 64.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp, vertical = 64.dp),
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        shape = RoundedCornerShape(topStart = 64.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 64.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp, vertical = 64.dp),
             ) {
-
-                if (onClose != null) {
-                    Box(
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        IconButton(onClick = onClose) {
-                            Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
-                        }
+            if (onClose != null) {
+                Box(
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    IconButton(onClick = onClose) {
+                        Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
                     }
                 }
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineLarge,
-                    textAlign = TextAlign.Center,
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Content()
             }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineLarge,
+                textAlign = TextAlign.Center,
+                )
+            Spacer(modifier = Modifier.height(32.dp))
+            Content()
         }
+    }
     }
 
 

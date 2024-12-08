@@ -1,8 +1,5 @@
 package com.michal.tictactoeonline.common.presentation.ticTacToeApp
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -76,7 +73,7 @@ fun TicTacToeApp(modifier: Modifier = Modifier){
             composable<MainScreen> {
                 MainScreenComposable(
                     onLogOut = { navController.navigate(RegisterScreen) },
-                    onPlayerVsPc = { navController.navigate(LocalGameScreen) },
+                    onPlayerVsFriend = { navController.navigate(LocalGameScreen) },
                     onCreateSession = { navController.navigate(CreateSessionScreen) },
                     onJoinSession = { navController.navigate(JoinSessionScreen) },
                     onPublicSessions = { navController.navigate(PublicSessionsScreen) },

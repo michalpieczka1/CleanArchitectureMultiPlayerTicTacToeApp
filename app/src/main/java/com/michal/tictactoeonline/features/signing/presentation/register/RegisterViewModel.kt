@@ -95,6 +95,8 @@ class RegisterViewModel(
                             playerRepository.savePassword(state.value.password)
                             playerRepository.saveUID(createPlayerResource.data!!)
                             playerRepository.saveSymbol("X")
+                            playerRepository.saveInGame(false)
+                            playerRepository.saveWinCount(0)
                             nextScreenNavigate()
                         }
                     }
