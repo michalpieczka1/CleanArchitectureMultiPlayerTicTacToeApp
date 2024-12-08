@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.michal.tictactoeonline.common.presentation.otherComposables.CardTemplate
+import com.michal.tictactoeonline.common.presentation.otherComposables.CustomOutlinedPasswordTextField
 import com.michal.tictactoeonline.common.presentation.otherComposables.CustomOutlinedTextField
 import com.michal.ui.theme.AppTheme
 import com.michal.ui.theme.LoginColor
@@ -106,7 +107,7 @@ fun LoginComposable(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    CustomOutlinedTextField(
+                    CustomOutlinedPasswordTextField(
                         value = state.value.password,
                         onValueChange = { loginViewModel.onPasswordChange(it) },
                         label = {

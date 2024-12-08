@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -22,14 +23,23 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.tictactoe.R
 import com.michal.tictactoeonline.common.presentation.otherComposables.CardTemplate
+import com.michal.tictactoeonline.common.presentation.otherComposables.CustomOutlinedPasswordTextField
 import com.michal.tictactoeonline.common.presentation.otherComposables.CustomOutlinedTextField
 import com.michal.ui.theme.AppTheme
 import com.michal.ui.theme.RegisterColor
@@ -53,6 +63,9 @@ fun RegisterComposable(
     } else {
         val isUsernameError = state.value.usernameError != null && state.value.isButtonClicked
 
+        var passwordHidden by remember {
+            mutableStateOf(true)
+        }
         Column(
             modifier = modifier
                 .padding(horizontal = 32.dp, vertical = 32.dp)
@@ -101,8 +114,8 @@ fun RegisterComposable(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    //TODO add password textfield
-                    CustomOutlinedTextField(
+
+                    CustomOutlinedPasswordTextField(
                         value = state.value.password,
                         onValueChange = { registerViewModel.onPasswordChange(it) },
                         label = {
@@ -112,7 +125,7 @@ fun RegisterComposable(
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = { Icon(imageVector = Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary) }
+                        leadingIcon = { Icon(imageVector = Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary) },
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
