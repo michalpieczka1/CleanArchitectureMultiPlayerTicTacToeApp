@@ -32,8 +32,7 @@ fun CustomOutlinedTextField(
     trailingIcon: @Composable() (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
-    passwordTextField:Boolean = false
+    keyboardActions: KeyboardActions = KeyboardActions.Default
 ) {
     if(label != null){
         label()
@@ -78,13 +77,13 @@ fun CustomOutlinedPasswordTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default
 ) {
-    if(label != null){
-        label()
-    }
     var passwordHidden by remember {
         mutableStateOf(true)
     }
 
+    if(label != null){
+        label()
+    }
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,

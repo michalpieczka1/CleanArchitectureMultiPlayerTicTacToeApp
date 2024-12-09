@@ -68,7 +68,7 @@ fun RegisterComposable(
         }
         Column(
             modifier = modifier
-                .padding(horizontal = 32.dp, vertical = 32.dp)
+                .padding(32.dp)
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.Center,
         ) {
@@ -144,7 +144,7 @@ fun RegisterComposable(
                             Text(
                                 text = "SIGN UP",
                                 style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSecondary
+                                color = MaterialTheme.colorScheme.onSecondary,
                             )
                         }
 

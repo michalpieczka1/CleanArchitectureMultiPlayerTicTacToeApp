@@ -252,7 +252,7 @@ fun OnlineGamePreview() {
     AppTheme {
         OnlineGameComposable(
             sessionKey = "",
-            onGoBack = { /*TODO*/ },
+            onGoBack = {  },
             onlineGameViewModel = mockViewModel
         )
     }

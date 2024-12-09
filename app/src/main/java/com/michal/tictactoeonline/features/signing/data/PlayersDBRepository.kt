@@ -1,6 +1,9 @@
 package com.michal.tictactoeonline.features.signing.data
 
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.michal.tictactoeonline.common.AppConstants
 import com.michal.tictactoeonline.common.data.model.Player
 import com.michal.tictactoeonline.common.util.Resource
@@ -26,41 +29,33 @@ class PlayersDBRepository(
 
         playersRef.get()
             .addOnSuccessListener checkIfNameAlreadyExists@{ snapshot ->
-                println("get sukces 1")
                 snapshot.children.forEach {
                     if (it.child(Player::username.name).value == player.username) {
                         trySend(Resource.Error("Player with this username already exists."))
-                        println("blad 2")
                         return@checkIfNameAlreadyExists
                     }
                 }
-                println("sukces 2")
                 val playerRef = playersRef.push()
                 val newPlayer = player.copy(uid = uid)
 
                 playerRef.setValue(newPlayer)
                     .addOnSuccessListener {
                         trySend(Resource.Success(uid))
-                        println("set value 3")
                         return@addOnSuccessListener
                     }
                     .addOnFailureListener {
                         trySend(Resource.Error(it.message ?: AppConstants.UNKNOWN_ERROR))
-                        println("blad 3")
                         return@addOnFailureListener
                     }
             }
             .addOnFailureListener {
                 trySend(Resource.Error(it.message ?: AppConstants.UNKNOWN_ERROR))
-                println("failure 1 ${it.cause}")
             }
-        println("koniec")
         awaitClose()
     }
 
     suspend fun getPlayer(username: String, password: String?): Resource<Player> {
         return try {
-            println("1")
             val snapshot = playersRef.get().await()
 
             for (playerSnapshot in snapshot.children) {
@@ -68,16 +63,12 @@ class PlayersDBRepository(
                 if (playerSnapshot.child(Player::username.name).value == username
                     && playerSnapshot.child(Player::password.name).value == password
                 ) {
-                    println("znaleziono ${playerSnapshot.key}")
                     val player = playerSnapshot.getValue(Player::class.java)
                     return if (player != null) {
                         Resource.Success(player)
                     } else {
                         Resource.Error(AppConstants.UNKNOWN_ERROR)
                     }
-                } else {
-                    println(playerSnapshot.child(Player::username.name).value == username)
-                    println(playerSnapshot.child(Player::password.name).value == password)
                 }
             }
 
@@ -85,6 +76,33 @@ class PlayersDBRepository(
         } catch (e: Exception) {
             println("error $e")
             Resource.Error(e.message ?: AppConstants.UNKNOWN_ERROR)
+        }
+    }
+
+    suspend fun observePlayer(uid: Uid): Flow<Resource<Player>> = callbackFlow{
+            val listener = (object: ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (playerSnapshot in snapshot.children) {
+                        if (playerSnapshot.child(Player::uid.name).value == uid) {
+                            val player = playerSnapshot.getValue(Player::class.java)
+                            if (player != null) {
+                                trySend(Resource.Success(player))
+                            } else {
+                                trySend(Resource.Error("Player not found"))
+                            }
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    trySend(Resource.Error(error.message))
+                }
+
+            })
+
+        playersRef.addValueEventListener(listener)
+        awaitClose {
+            playersRef.removeEventListener(listener)
         }
     }
 

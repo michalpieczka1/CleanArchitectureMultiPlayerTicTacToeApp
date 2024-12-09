@@ -150,7 +150,7 @@ fun EmptySessionPreview(){
             )
         )
         PublicSessionsComposable(
-            onGoBack = { /*TODO*/ },
+            onGoBack = {  },
             onGoToSession = {},
             publicSessionsViewModel = mockViewModel
         )

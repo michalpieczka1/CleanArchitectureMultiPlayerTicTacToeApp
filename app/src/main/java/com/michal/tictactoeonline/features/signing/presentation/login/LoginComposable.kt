@@ -94,7 +94,8 @@ fun LoginComposable(
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = { Icon(imageVector = Icons.Outlined.AccountBox, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary) }
+                        leadingIcon = { Icon(imageVector = Icons.Outlined.AccountBox, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary) },
+
                     )
                     if (isUsernameError) {
                         Text(
@@ -133,7 +134,7 @@ fun LoginComposable(
                             modifier = Modifier.fillMaxWidth(0.8f)
                         ) {
                             Text(
-                                text = "SIGN UP",
+                                text = "LOG IN",
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.onSecondary
                             )

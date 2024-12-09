@@ -73,9 +73,6 @@ class PlayerRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun doesPlayerExist(): Boolean {
         return dataStore.data.map { preferences ->
-            // Log the actual preferences content
-            Log.d("PlayerRepository", "Preferences: $preferences")
-
             listOf(USERNAME, PASSWORD, UID, SYMBOL, WIN_COUNT, IN_GAME).all { key ->
                 preferences.contains(key)
             }
@@ -99,7 +96,6 @@ class PlayerRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { preferences ->
             preferences[PASSWORD] = password
         }
-
     }
 
     suspend fun saveUID(uid: String) {
@@ -123,7 +119,6 @@ class PlayerRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { preferences ->
             preferences[IN_GAME] = inGame
         }
-        println("in game $inGame")
     }
 
 

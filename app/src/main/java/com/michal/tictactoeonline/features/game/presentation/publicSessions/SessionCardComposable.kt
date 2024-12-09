@@ -59,6 +59,6 @@ fun SessionCard(modifier: Modifier = Modifier, session: Session, onClick: () -> 
 @Composable
 fun Preview(){
     AppTheme {
-        SessionCard(session = Session("test", player1 = Player("Michal")), onClick = { /*TODO*/ })
+        SessionCard(session = Session("test", player1 = Player("Michal")), onClick = {  })
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -190,91 +192,44 @@ fun MainScreenComposable(
                         thickness = 4.dp
                     )
                 }
-
+                val isLocked = playerState.value.inGame
+                if(isLocked){
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        modifier = Modifier.fillMaxWidth(0.8f),
+                        shape = MaterialTheme.shapes.small
+                    ) {
+                        Text(
+                            text = "Player logged on to your account is already playing the game.",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
+                }
                 FlowRow(horizontalArrangement = Arrangement.Center, verticalArrangement = Arrangement.spacedBy(16.dp), maxItemsInEachRow = 2) {
                     GameCardComposable(
                         iconID = R.drawable.create_lobby,
                         labelText = stringResource(id = R.string.create_session),
-                        onClick = onCreateSession
+                        onClick = onCreateSession,
+                        isLocked = isLocked
                     )
                     GameCardComposable(
                         iconID = R.drawable.join_game,
                         labelText = stringResource(id = R.string.join_lobby),
-                        onClick = onJoinSession
+                        onClick = onJoinSession,
+                        isLocked = isLocked
                     )
                     GameCardComposable(
                         iconID = R.drawable.list_of_sessions,
                         labelText = stringResource(id = R.string.public_lobby_list),
-                        onClick = onPublicSessions
+                        onClick = onPublicSessions,
+                        isLocked = isLocked
                     )
                 }
             }
         }
-
-
-//        Box(
-//            modifier = modifier,
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text(
-//                text = stringResource(R.string.welcome_to_tic_tac_toe_online),
-//                fontStyle = MaterialTheme.typography.titleLarge.fontStyle,
-//                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-//                fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-//                textAlign = TextAlign.Center
-//            )
-//            Spacer(modifier = Modifier.height(32.dp))
-//            Card(
-//                modifier = Modifier.padding(top = topPadding, start = 16.dp, end = 16.dp),
-//                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-//            ) {
-//                Column(
-//                    modifier = Modifier
-//                        .padding(16.dp)
-//                        .fillMaxWidth(),
-//                    verticalArrangement = Arrangement.spacedBy(32.dp),
-//                    horizontalAlignment = Alignment.CenterHorizontally
-//                ) {
-//                    Button(onClick = onPlayerVsPc, modifier = Modifier.fillMaxWidth()) {
-//                        Text(
-//                            text = stringResource(R.string.play_vs_pc),
-//                            fontStyle = MaterialTheme.typography.labelLarge.fontStyle,
-//                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-//                            fontWeight = MaterialTheme.typography.labelLarge.fontWeight
-//                        )
-//                    }
-//
-//                    Button(onClick = onCreateSession, modifier = Modifier.fillMaxWidth()) {
-//                        Text(
-//                            text = stringResource(R.string.create_session),
-//                            fontStyle = MaterialTheme.typography.labelLarge.fontStyle,
-//                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-//                            fontWeight = MaterialTheme.typography.labelLarge.fontWeight
-//                        )
-//                    }
-//
-//                    Button(onClick = onJoinSession, modifier = Modifier.fillMaxWidth()) {
-//                        Text(
-//                            text = stringResource(R.string.join_lobby),
-//                            fontStyle = MaterialTheme.typography.labelLarge.fontStyle,
-//                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-//                            fontWeight = MaterialTheme.typography.labelLarge.fontWeight
-//                        )
-//                    }
-//
-//                    Button(onClick = onPublicSessions, modifier = Modifier.fillMaxWidth()) {
-//                        Text(
-//                            text = stringResource(R.string.public_lobby_list),
-//                            fontStyle = MaterialTheme.typography.labelLarge.fontStyle,
-//                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-//                            fontWeight = MaterialTheme.typography.labelLarge.fontWeight
-//                        )
-//                    }
-//
-//                }
-//            }
-//
-//        }
     }
 }
 
@@ -284,7 +239,7 @@ fun MainScreenComposable(
 fun MainScreenComposablePreview() {
     val mockViewModel = mockk<MainScreenViewModel>()
     every { mockViewModel.playerState } returns MutableStateFlow(
-        Player("Username")
+        Player("Username", inGame = true)
     )
 
     AppTheme {

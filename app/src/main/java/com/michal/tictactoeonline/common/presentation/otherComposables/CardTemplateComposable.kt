@@ -19,16 +19,19 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.michal.ui.theme.AppTheme
+import com.michal.ui.theme.LocalAppShapes
 
 @Composable
 fun CardTemplate(
@@ -36,27 +39,31 @@ fun CardTemplate(
     title: String,
     Content: @Composable() () -> Unit,
     onClose: (() -> Unit)? = null,
-    containerColor: Color = MaterialTheme.colorScheme.tertiary
+    containerColor: Color = MaterialTheme.colorScheme.tertiary,
+    shape: Shape = LocalAppShapes.current.customShape
 ) {
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = containerColor),
-        shape = RoundedCornerShape(topStart = 64.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 64.dp)
+        shape = shape
     ) {
+        if (onClose != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(top = 16.dp, end = 16.dp)
+                    .border(2.dp,MaterialTheme.colorScheme.secondary, shape = MaterialTheme.shapes.medium),
+            ) {
+                IconButton(onClick = onClose) {
+                    Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
+                }
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp, vertical = 64.dp),
             ) {
-            if (onClose != null) {
-                Box(
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    IconButton(onClick = onClose) {
-                        Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
-                    }
-                }
-            }
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,

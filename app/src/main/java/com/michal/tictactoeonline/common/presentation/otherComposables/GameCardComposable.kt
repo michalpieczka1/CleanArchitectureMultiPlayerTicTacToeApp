@@ -125,7 +125,7 @@ fun GameCardComposablePreview() {
         GameCardComposable(
             iconID = R.drawable.two_players,
             labelText = "Play vs friend",
-            onClick = { /*TODO*/ },
+            onClick = {  },
 
         )
     }
