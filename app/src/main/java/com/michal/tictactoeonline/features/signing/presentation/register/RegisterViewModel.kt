@@ -26,9 +26,6 @@ class RegisterViewModel(
     private val _state = MutableStateFlow(RegisterUiState())
     val state: StateFlow<RegisterUiState> = _state.asStateFlow()
 
-    init {
-        isPlayerAlreadyLogged()
-    }
 
     fun onUsernameChange(username:String){
         _state.update {
@@ -101,16 +98,6 @@ class RegisterViewModel(
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private fun isPlayerAlreadyLogged(){
-        viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isUserAlreadyLogged = ( playerRepository.doesPlayerExist())
-                )
             }
         }
     }

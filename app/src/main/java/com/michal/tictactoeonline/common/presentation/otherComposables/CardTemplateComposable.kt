@@ -39,7 +39,7 @@ fun CardTemplate(
     title: String,
     Content: @Composable() () -> Unit,
     onClose: (() -> Unit)? = null,
-    containerColor: Color = MaterialTheme.colorScheme.tertiary,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
     shape: Shape = LocalAppShapes.current.customShape
 ) {
     Card(

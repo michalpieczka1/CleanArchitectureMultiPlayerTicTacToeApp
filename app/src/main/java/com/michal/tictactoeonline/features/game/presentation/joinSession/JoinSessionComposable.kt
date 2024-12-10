@@ -35,7 +35,6 @@ import com.michal.tictactoeonline.common.presentation.otherComposables.CustomOut
 import com.michal.tictactoeonline.common.presentation.otherComposables.ErrorDialog
 import com.michal.tictactoeonline.common.util.Resource
 import com.michal.ui.theme.AppTheme
-import com.michal.ui.theme.DarkGradientBrush
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow

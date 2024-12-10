@@ -54,16 +54,11 @@ val LoginColor = Color(0xFF4cd137)
 
 val RegisterColor = Color(0xFF386CEC)
 
-val LightGradientBrush = Brush.radialGradient(
-    colors = listOf(
+val LightGradient = listOf(
         LightOnPrimaryContainer,
         LightPrimaryColor
     )
-)
-
-val DarkGradientBrush = Brush.radialGradient(
-    colors = listOf(
+val DarkGradient = listOf(
         DarkOnPrimaryContainer,
         DarkPrimaryColor
     )
-)
