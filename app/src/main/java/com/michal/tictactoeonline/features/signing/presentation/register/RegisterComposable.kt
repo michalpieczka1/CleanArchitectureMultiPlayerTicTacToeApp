@@ -14,7 +14,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.Lock
@@ -34,10 +37,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -47,6 +55,7 @@ import com.example.tictactoe.R
 import com.michal.tictactoeonline.common.presentation.otherComposables.CardTemplate
 import com.michal.tictactoeonline.common.presentation.otherComposables.CustomOutlinedPasswordTextField
 import com.michal.tictactoeonline.common.presentation.otherComposables.CustomOutlinedTextField
+import com.michal.tictactoeonline.common.presentation.otherComposables.WarningDialog
 import com.michal.ui.theme.AppTheme
 import com.michal.ui.theme.DarkGradient
 import com.michal.ui.theme.LightGradient
@@ -57,7 +66,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-//todo show errors and if user set password show dialog if he really wants to create acc without password
+//TODO manage errors better
 @Composable
 fun RegisterComposable(
     modifier: Modifier = Modifier,
@@ -80,10 +89,15 @@ fun RegisterComposable(
     val welcomeTextOffset = remember { Animatable(0f) }
     var welcomeTextWidth by remember { mutableFloatStateOf(0f) }
     val welcomeTextBrush = Brush.horizontalGradient(
-        colors = if (isSystemInDarkTheme()) DarkGradient else LightGradient,
+        colors = if (isSystemInDarkTheme()) DarkGradient else LightGradient.reversed(),
         startX = welcomeTextOffset.value,
         endX = welcomeTextOffset.value * 2
     )
+
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember {
+        FocusRequester()
+    }
     LaunchedEffect(Unit) {
         launch {
             welcomeTextOffset.animateTo(
@@ -110,9 +124,25 @@ fun RegisterComposable(
     Column(
         modifier = modifier
             .padding(32.dp)
-            .fillMaxHeight(),
+            .fillMaxHeight()
+            .imePadding(),
         verticalArrangement = Arrangement.Center,
     ) {
+        if(state.value.showWarningDialog){
+            WarningDialog(
+                onDismiss = { registerViewModel.onRegisterClick(onGoToNextScreen) },
+                onConfirm = {
+                    focusRequester.requestFocus()
+                    registerViewModel.hideWarningDialog()
+                },
+                onDismissText = "Ignore",
+                onConfirmText = "Add password",
+                title = "No password set",
+                description = "While setting a password is optional, we highly recommend creating one to enhance your account's security.",
+                headerEmoji = "⚠\uFE0F"
+            )
+        }
+
         Box(modifier = Modifier.align(Alignment.End)) {
             Column(horizontalAlignment = Alignment.End) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -163,7 +193,15 @@ fun RegisterComposable(
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSecondary
                         )
-                    }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        }
+                    )
                 )
                 if (isUsernameError) {
                     Text(
@@ -177,6 +215,9 @@ fun RegisterComposable(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 CustomOutlinedPasswordTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
                     value = state.value.password,
                     onValueChange = { registerViewModel.onPasswordChange(it) },
                     label = {
@@ -185,7 +226,6 @@ fun RegisterComposable(
                             style = MaterialTheme.typography.labelLarge
                         )
                     },
-                    modifier = Modifier.fillMaxWidth(),
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Outlined.Lock,
@@ -193,6 +233,21 @@ fun RegisterComposable(
                             tint = MaterialTheme.colorScheme.onSecondary
                         )
                     },
+                    placeholder = {
+                        Text(
+                            text = "Password is not necessary",
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                        }
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -203,6 +258,7 @@ fun RegisterComposable(
                 ) {
                     Button(
                         onClick = {
+
                             registerViewModel.onRegisterClick(onGoToNextScreen)
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),

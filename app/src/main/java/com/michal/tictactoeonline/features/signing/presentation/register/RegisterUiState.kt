@@ -7,5 +7,6 @@ data class RegisterUiState(
     val usernameError: String? = null,
     val password: String = "",
     val isButtonClicked:Boolean = false,
-    val dbResource: Resource<Any>? = null
+    val dbResource: Resource<Any>? = null,
+    val showWarningDialog: Boolean = false
 )

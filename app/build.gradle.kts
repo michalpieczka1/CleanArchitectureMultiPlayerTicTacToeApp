@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.tictactoe"
-        minSdk = 26
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.compose.konfetti)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.mockk)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     androidTestImplementation(libs.androidx.junit)

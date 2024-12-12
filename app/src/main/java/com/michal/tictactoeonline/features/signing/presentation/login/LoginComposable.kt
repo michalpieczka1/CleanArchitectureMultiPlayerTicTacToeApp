@@ -13,9 +13,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -39,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -49,8 +54,10 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -72,7 +79,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-//TODO add keyboardoptions and show error if user is not existing
 @Composable
 fun LoginComposable(
     modifier: Modifier = Modifier,
@@ -103,10 +109,13 @@ fun LoginComposable(
         var welcomeTextWidth by remember { mutableFloatStateOf(0f) }
 
         val welcomeTextBrush = Brush.horizontalGradient(
-            colors = if(isSystemInDarkTheme()) DarkGradient else LightGradient,
+            colors = if(isSystemInDarkTheme()) DarkGradient else LightGradient.reversed(),
             startX = welcomeTextOffset.value,
             endX = welcomeTextOffset.value * 2
         )
+
+        val focusManager = LocalFocusManager.current
+
         LaunchedEffect(Unit) {
             launch {
                 welcomeTextOffset.animateTo(
@@ -130,8 +139,9 @@ fun LoginComposable(
 
         Column(
             modifier = modifier
+                .imePadding()
                 .padding(horizontal = 32.dp, vertical = 32.dp)
-                .fillMaxHeight(),
+                .fillMaxSize(),
             verticalArrangement = Arrangement.Center,
         ) {
             Box(modifier = Modifier.align(Alignment.End)) {
@@ -180,9 +190,18 @@ fun LoginComposable(
                                 style = MaterialTheme.typography.labelLarge
                             )
                         },
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Outlined.AccountBox, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary)
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                focusManager.moveFocus(FocusDirection.Down)
+                            }
+                        ),
                         modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = { Icon(imageVector = Icons.Outlined.AccountBox, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary) },
-
                     )
                     if (isUsernameError) {
                         Text(
@@ -205,7 +224,24 @@ fun LoginComposable(
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = { Icon(imageVector = Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary) }
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary)
+                        },
+                        placeholder = {
+                            Text(
+                                text = "Password is not necessary",
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                focusManager.clearFocus()
+                            }
+                        )
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))

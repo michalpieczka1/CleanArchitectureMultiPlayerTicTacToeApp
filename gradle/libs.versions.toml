@@ -8,8 +8,8 @@ junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.6.1"
-activityCompose = "1.8.0"
-composeBom = "2024.10.00"
+activityCompose = "1.9.3"
+composeBom = "2024.12.01"
 googleGmsGoogleServices = "4.4.2"
 firebaseDatabase = "21.0.0"
 composeNavigation = "2.8.3"
@@ -18,6 +18,7 @@ serialization = "1.6.0"
 uiTextGoogleFonts = "1.7.3"
 konfetti-compose = "2.0.4"
 parcelizeVersion = "2.0.21"
+appcompat = "1.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +42,7 @@ navigation-compose = { module = "androidx.navigation:navigation-compose", versio
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 compose-konfetti = { group="nl.dionsegijn", name="konfetti-compose", version.ref = "konfetti-compose"}
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
