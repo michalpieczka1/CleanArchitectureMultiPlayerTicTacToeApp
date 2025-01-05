@@ -20,17 +20,29 @@ import kotlinx.coroutines.launch
 class MainScreenViewModel(
     private val playerRepository: PlayerRepository,
     private val playersDBRepository: PlayersDBRepository
-): ViewModel() {
+) : ViewModel() {
     private val _playerState = MutableStateFlow<Player>(Player())
-    val playerState:StateFlow<Player> = _playerState.asStateFlow()
+    val playerState: StateFlow<Player> = _playerState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            playerRepository.currentPlayer.collect {
-                playersDBRepository.observePlayer(it.uid).collect { snapshot ->
+            playerRepository.currentPlayer.collect { localPlayer ->
+                _playerState.update { state ->
+                    state.copy(
+                        username = localPlayer.username,
+                        password = localPlayer.password,
+                        uid = localPlayer.uid,
+                        winAmount = localPlayer.winAmount,
+                        inGame = localPlayer.inGame,
+                        symbol = localPlayer.symbol,
+                    )
+                }
+            }
+            playerRepository.currentPlayer.collect { localPlayer ->
+                playersDBRepository.observePlayer(localPlayer.uid).collect { snapshot ->
                     when (snapshot) {
                         is Resource.Error -> println("blad")
-                        is Resource.Loading -> TODO()
+                        is Resource.Loading -> println("ladowanie")
                         is Resource.Success -> {
                             if (snapshot.data != null) {
                                 val newPlayer = Player(
@@ -66,22 +78,22 @@ class MainScreenViewModel(
         }
     }
 
-    fun onLogOutClick(onLogOut: () -> Unit){
-            viewModelScope.launch {
-                playerRepository.clearData()
-                onLogOut()
-            }
+    fun onLogOutClick(onLogOut: () -> Unit) {
+        viewModelScope.launch {
+            playerRepository.clearData()
+            onLogOut()
+        }
     }
 
 
-    companion object{
-        fun provideFactory(): ViewModelProvider.Factory{
+    companion object {
+        fun provideFactory(): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
                     val application = (this[APPLICATION_KEY] as TicTacToeApplication)
                     val playerRepository = application.appContainer.playerRepository
                     val playersDBRepository = application.appContainer.playersDBRepository
-                    MainScreenViewModel(playerRepository,playersDBRepository)
+                    MainScreenViewModel(playerRepository, playersDBRepository)
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.michal.tictactoeonline.common.presentation.otherComposables
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -131,7 +133,9 @@ fun WarningDialog(
     onConfirmText: String,
     headerEmoji: String? = null
 ) {
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+    ) {
         Box(
             modifier = Modifier
                 .wrapContentHeight()
@@ -144,7 +148,10 @@ fun WarningDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
             Spacer(modifier = Modifier.height(64.dp))
-                Card(modifier = Modifier.fillMaxWidth()) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -237,9 +244,9 @@ fun ErrorDialog(
     )
 }
 
-@Preview(showBackground = true)
+@Preview()
 @Composable
-fun WarningDialogEmojiPreview() {
+fun WarningDialogPreview() {
     AppTheme {
         WarningDialog(
             onDismiss = { /*TODO*/ },

@@ -227,13 +227,6 @@ fun LoginComposable(
                         leadingIcon = {
                             Icon(imageVector = Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary)
                         },
-                        placeholder = {
-                            Text(
-                                text = "Password is not necessary",
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        },
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Done
                         ),

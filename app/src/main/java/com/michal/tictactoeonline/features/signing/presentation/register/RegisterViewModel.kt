@@ -30,14 +30,20 @@ class RegisterViewModel(
         _state.update {
             it.copy(
                 username = username,
-                isButtonClicked = false
+                isButtonClicked = false,
+                dbResource = null
             )
         }
+        warningDialogAlreadyShown = false
     }
 
     fun onPasswordChange(password: String) {
         _state.update {
-            it.copy(password = password)
+            it.copy(
+                password = password,
+                isButtonClicked = false,
+                dbResource = null
+            )
         }
     }
 
@@ -59,7 +65,7 @@ class RegisterViewModel(
         if (!isUsernameValid) {
             _state.update {
                 it.copy(
-                    usernameError = AppConstants.EMPTY_USERNAME,
+                    usernameError = AppConstants.ERROR_EMPTY_USERNAME,
                     dbResource = null
                 )
             }
@@ -67,56 +73,68 @@ class RegisterViewModel(
             _state.update {
                 it.copy(usernameError = null)
             }
-            if (state.value.password == "" && !warningDialogAlreadyShown) {
-                _state.update {
-                    it.copy(
-                        showWarningDialog = true
-                    )
-                }
-                warningDialogAlreadyShown = true
-            } else {
+
+            if (state.value.dbResource !is Resource.Error && state.value.usernameError == null) {
                 val player =
                     Player(username = state.value.username, password = state.value.password)
 
                 viewModelScope.launch {
-                    playersDBRepository.createPlayer(player = player)
-                        .collect { createPlayerResource ->
-                            when (createPlayerResource) {
-                                is Resource.Error -> {
-                                    _state.update {
-                                        it.copy(
-                                            dbResource = Resource.Error(createPlayerResource.message!!)
-                                        )
+                    if(playersDBRepository.getPlayer(player.username,player.password) is Resource.Success){
+                        _state.update {
+                            it.copy(
+                                dbResource = Resource.Error(AppConstants.ERROR_USERNAME_EXISTS)
+                            )
+                        }
+                        return@launch
+                    }else if (state.value.password == "" && !warningDialogAlreadyShown) {
+                        _state.update {
+                            it.copy(
+                                showWarningDialog = true
+                            )
+                        }
+                        warningDialogAlreadyShown = true
+                        return@launch
+                    } else {
+                        playersDBRepository.createPlayer(player = player)
+                            .collect { createPlayerResource ->
+                                when (createPlayerResource) {
+                                    is Resource.Error -> {
+                                        _state.update {
+                                            it.copy(
+                                                dbResource = Resource.Error(createPlayerResource.message!!)
+                                            )
+                                        }
                                     }
-                                }
 
-                                is Resource.Loading -> {
-                                    _state.update {
-                                        it.copy(
-                                            dbResource = Resource.Loading()
-                                        )
+                                    is Resource.Loading -> {
+                                        _state.update {
+                                            it.copy(
+                                                dbResource = Resource.Loading()
+                                            )
+                                        }
                                     }
-                                }
 
-                                is Resource.Success -> {
-                                    _state.update {
-                                        it.copy(
-                                            dbResource = Resource.Success(true)
-                                        )
+                                    is Resource.Success -> {
+                                        _state.update {
+                                            it.copy(
+                                                dbResource = Resource.Success(true)
+                                            )
+                                        }
+                                        playerRepository.saveUsername(state.value.username)
+                                        playerRepository.savePassword(state.value.password)
+                                        playerRepository.saveUID(createPlayerResource.data!!)
+                                        playerRepository.saveSymbol("X")
+                                        playerRepository.saveInGame(false)
+                                        playerRepository.saveWinCount(0)
+                                        nextScreenNavigate()
+
                                     }
-                                    playerRepository.saveUsername(state.value.username)
-                                    playerRepository.savePassword(state.value.password)
-                                    playerRepository.saveUID(createPlayerResource.data!!)
-                                    playerRepository.saveSymbol("X")
-                                    playerRepository.saveInGame(false)
-                                    playerRepository.saveWinCount(0)
-                                    nextScreenNavigate()
                                 }
                             }
-                        }
+
+                    }
                 }
             }
-
         }
     }
 

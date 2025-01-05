@@ -31,7 +31,7 @@ class PlayersDBRepository(
             .addOnSuccessListener checkIfNameAlreadyExists@{ snapshot ->
                 snapshot.children.forEach {
                     if (it.child(Player::username.name).value == player.username) {
-                        trySend(Resource.Error("Player with this username already exists."))
+                        trySend(Resource.Error(AppConstants.ERROR_USERNAME_EXISTS))
                         return@checkIfNameAlreadyExists
                     }
                 }
@@ -106,7 +106,7 @@ class PlayersDBRepository(
         }
     }
 
-    //TODO
+    //TODO dodac error handling
     suspend fun getListOf100BestPlayers(): List<Player> {
         val list = playersRef.orderByChild(Player::winAmount.name).limitToFirst(100).get().await()
         list.children.forEach {

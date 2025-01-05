@@ -8,14 +8,12 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.michal.tictactoeonline.common.AppConstants
 import com.michal.tictactoeonline.common.data.PlayerRepository
-import com.michal.tictactoeonline.common.data.model.Player
 import com.michal.tictactoeonline.common.di.TicTacToeApplication
 import com.michal.tictactoeonline.common.util.Resource
 import com.michal.tictactoeonline.features.signing.data.PlayersDBRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -57,7 +55,7 @@ class LoginViewModel(
         if(!isUsernameValid){
             _state.update {
                 it.copy(
-                    usernameError = AppConstants.EMPTY_USERNAME,
+                    usernameError = AppConstants.ERROR_EMPTY_USERNAME,
                     dbResource = null
                 )
             }

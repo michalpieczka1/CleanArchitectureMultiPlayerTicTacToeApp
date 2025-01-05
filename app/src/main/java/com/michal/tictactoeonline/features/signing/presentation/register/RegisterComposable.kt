@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -36,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
@@ -56,6 +58,7 @@ import com.michal.tictactoeonline.common.presentation.otherComposables.CardTempl
 import com.michal.tictactoeonline.common.presentation.otherComposables.CustomOutlinedPasswordTextField
 import com.michal.tictactoeonline.common.presentation.otherComposables.CustomOutlinedTextField
 import com.michal.tictactoeonline.common.presentation.otherComposables.WarningDialog
+import com.michal.tictactoeonline.common.util.Resource
 import com.michal.ui.theme.AppTheme
 import com.michal.ui.theme.DarkGradient
 import com.michal.ui.theme.LightGradient
@@ -98,6 +101,7 @@ fun RegisterComposable(
     val focusRequester = remember {
         FocusRequester()
     }
+
     LaunchedEffect(Unit) {
         launch {
             welcomeTextOffset.animateTo(
@@ -117,6 +121,10 @@ fun RegisterComposable(
             }
             emojiFloat = 0f
         }
+            while (true){
+                delay(500)
+                println(state.value)
+            }
     }
 
     val isUsernameError = state.value.usernameError != null && state.value.isButtonClicked
@@ -124,17 +132,18 @@ fun RegisterComposable(
     Column(
         modifier = modifier
             .padding(32.dp)
-            .fillMaxHeight()
-            .imePadding(),
+            .fillMaxSize()
+            .imePadding()
+            .then(if (state.value.showWarningDialog) Modifier.blur(10.dp) else Modifier),
         verticalArrangement = Arrangement.Center,
     ) {
         if(state.value.showWarningDialog){
             WarningDialog(
-                onDismiss = { registerViewModel.onRegisterClick(onGoToNextScreen) },
-                onConfirm = {
+                onDismiss = {
                     focusRequester.requestFocus()
                     registerViewModel.hideWarningDialog()
                 },
+                onConfirm = { registerViewModel.onRegisterClick(onGoToNextScreen) },
                 onDismissText = "Ignore",
                 onConfirmText = "Add password",
                 title = "No password set",
@@ -173,7 +182,10 @@ fun RegisterComposable(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        CardTemplate(title = "Sign Up", containerColor = RegisterColor, modifier = Modifier
+        CardTemplate(
+            title = "Sign Up",
+            containerColor = RegisterColor,
+            modifier = Modifier
             .fillMaxWidth(),
             Content = {
                 CustomOutlinedTextField(
@@ -249,7 +261,17 @@ fun RegisterComposable(
                         }
                     )
                 )
+                state.value.dbResource.let { resource ->
+                    if(state.value.dbResource is Resource.Error){
+                        Text(
+                            text = resource?.message!!,
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
 
+                }
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Column(
@@ -315,3 +337,22 @@ fun RegisterComposablePreview() {
             onGoToLoginScreen = {})
     }
 }
+@Preview(showBackground = true)
+@PreviewLightDark
+@Composable
+fun RegisterComposableNoPasswordSet(){
+    AppTheme {
+        val mockViewModel = mockk<RegisterViewModel>()
+        every { mockViewModel.state } returns MutableStateFlow(
+            RegisterUiState(
+                username = "uzytkownik111",
+                password = "",
+                showWarningDialog = true
+            )
+        )
+        RegisterComposable(
+            registerViewModel = mockViewModel,
+            onGoToNextScreen = {},
+            onGoToLoginScreen = {})
+    }
+    }

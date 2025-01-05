@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.michal.tictactoeonline.features.game.presentation.createSession.CreateSessionComposable
 import com.michal.tictactoeonline.features.game.presentation.joinSession.JoinSessionComposable
+import com.michal.tictactoeonline.features.game.presentation.leaderboard.LeaderboardComposable
 import com.michal.tictactoeonline.features.game.presentation.localGame.LocalGameComposable
 import com.michal.tictactoeonline.features.game.presentation.main.MainScreenComposable
 import com.michal.tictactoeonline.features.signing.presentation.register.RegisterComposable
@@ -89,6 +90,7 @@ fun TicTacToeApp(
                         onCreateSession = { navController.navigate(CreateSessionScreen) },
                         onJoinSession = { navController.navigate(JoinSessionScreen) },
                         onPublicSessions = { navController.navigate(PublicSessionsScreen) },
+                        onLeaderboard = {navController.navigate(LeaderboardScreen)},
                         modifier = modifier
                     )
                 }
@@ -124,6 +126,11 @@ fun TicTacToeApp(
                         onGoToSession = { navController.navigate(OnlineGameScreen(sessionKey = it)) }
                     )
                 }
+                composable<LeaderboardScreen> {
+                    LeaderboardComposable(
+                        onGoBack = { navController.navigate(MainScreen) }
+                    )
+                }
             }
         })
 
@@ -147,6 +154,9 @@ object CreateSessionScreen
 
 @Serializable
 object JoinSessionScreen
+
+@Serializable
+object LeaderboardScreen
 
 @Serializable
 data class OnlineGameScreen(

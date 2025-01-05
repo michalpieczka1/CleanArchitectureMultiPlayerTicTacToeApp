@@ -71,7 +71,7 @@ fun LocalGameComposable(
             verticalArrangement = Arrangement.Center
         ) {
             val displayedText = if (state.value.isWin == true) {
-                stringResource(R.string.is_the_winner, state.value.currentTurn.username)
+                stringResource(R.string.is_the_winner, state.value.winner?.username ?: "UserName")
             } else if (state.value.isTie == true) {
                 stringResource(R.string.it_s_a_tie)
             } else {

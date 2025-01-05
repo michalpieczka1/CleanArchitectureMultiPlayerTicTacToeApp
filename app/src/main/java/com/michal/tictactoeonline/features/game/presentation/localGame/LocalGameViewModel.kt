@@ -55,6 +55,7 @@ class LocalGameViewModel(
     }
     fun onBoardClicked(indexClicked: Int) {
         if (uiState.value.board[indexClicked] == "" && uiState.value.isWin == null && uiState.value.isTie == null) {
+                println(uiState.value.currentTurn)
             val oldBoard = uiState.value.board
             val newBoard = oldBoard.toMutableList()
             newBoard[indexClicked] = uiState.value.currentTurn.symbol ?: ""
@@ -66,6 +67,7 @@ class LocalGameViewModel(
             }
 
             if (isWin(indexClicked)) {
+                println(uiState.value.currentTurn)
                 _uiState.update {
                     it.copy(
                         winner = uiState.value.currentTurn,
@@ -92,6 +94,7 @@ class LocalGameViewModel(
                 )
             }
         }
+                println(uiState.value.currentTurn)
     }
 
     private fun updateWinCount(){

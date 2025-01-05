@@ -63,6 +63,7 @@ fun MainScreenComposable(
     onCreateSession: () -> Unit,
     onJoinSession: () -> Unit,
     onPublicSessions: () -> Unit,
+    onLeaderboard: () -> Unit,
     mainScreenViewModel: MainScreenViewModel = viewModel(
         factory = MainScreenViewModel.provideFactory()
     )
@@ -227,6 +228,12 @@ fun MainScreenComposable(
                         onClick = onPublicSessions,
                         isLocked = isLocked
                     )
+                    //TODO add leaderboard
+//                    GameCardComposable(
+//                        iconID = R.drawable.list_of_sessions,
+//                        labelText = stringResource(R.string.leaderboard),
+//                        onClick = onLeaderboard,
+//                    )
                 }
             }
         }
@@ -249,6 +256,7 @@ fun MainScreenComposablePreview() {
             onCreateSession = {},
             onLogOut = {},
             onPlayerVsFriend = {},
+            onLeaderboard = {},
             mainScreenViewModel = mockViewModel
         )
     }
