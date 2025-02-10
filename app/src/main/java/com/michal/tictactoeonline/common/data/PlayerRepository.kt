@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
-class PlayerRepository(private val dataStore: DataStore<Preferences>) {
+    class PlayerRepository(private val dataStore: DataStore<Preferences>) {
     private companion object {
         val USERNAME = stringPreferencesKey("username")
         val PASSWORD = stringPreferencesKey("password")
