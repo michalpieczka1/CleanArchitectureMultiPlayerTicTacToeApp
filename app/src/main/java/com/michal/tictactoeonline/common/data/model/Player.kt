@@ -12,7 +12,8 @@ data class Player(
     val uid: String = "",
     val symbol: String? = "X",
     val winAmount: Int = 0,
-    val inGame: Boolean = false
+    val onlineGamesBlocked: Boolean = false,
+    val blockedGamesMessage: BlockedGamesMessages = BlockedGamesMessages.PLAYER_PLAYING,
 ){
     @Exclude
     fun toMap(): Map<String,Any?>{
@@ -22,7 +23,12 @@ data class Player(
             "uid" to uid,
             "symbol" to symbol,
             "winAmount" to winAmount,
-            "inGame" to inGame
+            "inGame" to onlineGamesBlocked
         )
+    }
+
+    enum class BlockedGamesMessages(val value: String){
+        PLAYER_PLAYING("Player logged on to your account is already playing the game."),
+        NO_INTERNET_CONNECTION("Online mode unavailable, please check your internet connection")
     }
 }

@@ -141,7 +141,7 @@ class OnlineGameViewModel(
                         session = it.session.copy(
                             player1 = player.copy(
                                 symbol = "X",
-                                inGame = true),
+                                onlineGamesBlocked = true),
                             playerCount = 1
                         )
                     )
@@ -152,7 +152,7 @@ class OnlineGameViewModel(
                         session = it.session.copy(
                             player2 = player.copy(
                                 symbol = "O",
-                                inGame = true
+                                onlineGamesBlocked = true
                             ),
                             playerCount = 2
                         )
@@ -160,7 +160,7 @@ class OnlineGameViewModel(
                 }
 
             }
-            playersDBRepository.updatePlayer(playerRepository.currentPlayer.first().copy(inGame = true))
+            playersDBRepository.updatePlayer(playerRepository.currentPlayer.first().copy(onlineGamesBlocked = true))
 
             true
         }

@@ -92,7 +92,7 @@ class LoginViewModel(
                         playerRepository.savePassword(state.value.password)
                         playerRepository.saveUID(resource.data?.uid!!)
                         playerRepository.saveSymbol(resource.data.symbol!!)
-                        playerRepository.saveInGame(resource.data.inGame)
+                        playerRepository.saveInGame(resource.data.onlineGamesBlocked)
                         playerRepository.saveWinCount(resource.data.winAmount)
                         nextScreenNavigate()
                     }

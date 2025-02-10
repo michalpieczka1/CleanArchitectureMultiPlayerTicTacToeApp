@@ -57,7 +57,7 @@ import kotlinx.coroutines.flow.map
             uid = uid,
             symbol = symbol,
             winAmount = winCount,
-            inGame = inGame
+            onlineGamesBlocked = inGame
         )
     }
 

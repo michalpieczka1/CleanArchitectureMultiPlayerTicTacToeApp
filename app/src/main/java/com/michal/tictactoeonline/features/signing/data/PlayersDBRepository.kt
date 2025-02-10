@@ -125,7 +125,7 @@ class PlayersDBRepository(
                 playersRef.child(key).updateChildren(
                     player.toMap()
                 )
-                println(player.inGame)
+                println(player.onlineGamesBlocked)
             }else{
                 throw IllegalStateException("No key found for the matching player.")
             }
