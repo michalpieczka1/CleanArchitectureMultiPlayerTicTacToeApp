@@ -1,6 +1,5 @@
 package com.michal.tictactoeonline.common.data
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -10,8 +9,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.michal.tictactoeonline.common.data.model.Player
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.combineTransform
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
@@ -26,24 +23,18 @@ class PlayerRepository(private val dataStore: DataStore<Preferences>) {
     }
 
 
-    val currentUsername: Flow<String> = dataStore.data.map { preferences ->
-        preferences[USERNAME] ?: ""
+    private fun <T> getPreference(key: Preferences.Key<T>, defaultValue: T): Flow<T>{
+        return dataStore.data.map {
+            it[key] ?: defaultValue
+        }
     }
-    val currentPassword: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PASSWORD] ?: ""
-    }
-    val currentUID: Flow<String> = dataStore.data.map { preferences ->
-        preferences[UID] ?: ""
-    }
-    val currentSymbol: Flow<String> = dataStore.data.map { preferences ->
-        preferences[SYMBOL] ?: "X"
-    }
-    val currentWinCount: Flow<Int> = dataStore.data.map { preferences ->
-        preferences[WIN_COUNT] ?: 0
-    }
-    val currentInGame: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[IN_GAME] ?: false
-    }
+
+    val currentUsername: Flow<String> = getPreference(USERNAME, "")
+    val currentPassword: Flow<String> = getPreference(PASSWORD,"")
+    val currentUID: Flow<String> = getPreference(UID, "")
+    val currentSymbol: Flow<String> = getPreference(SYMBOL, "X")
+    val currentWinCount: Flow<Int> = getPreference(WIN_COUNT, 0)
+    val currentInGame: Flow<Boolean> = getPreference(IN_GAME, false)
 
     val currentPlayer: Flow<Player> = combine(
         currentUsername,
@@ -73,16 +64,21 @@ class PlayerRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun doesPlayerExist(): Boolean {
         return dataStore.data.map { preferences ->
-            listOf(USERNAME, PASSWORD, UID, SYMBOL, WIN_COUNT, IN_GAME).all { key ->
-                preferences.contains(key)
+            listOf(USERNAME, PASSWORD, UID).all { key ->
+                preferences.contains(key) || preferences[key]?.isNotEmpty() ?: false
             }
         }.firstOrNull() ?: false
     }
 
 
     suspend fun clearData() {
-        dataStore.edit {
-            it.clear()
+        dataStore.edit { preferences ->
+            preferences.remove(USERNAME)
+            preferences.remove(PASSWORD)
+            preferences.remove(UID)
+            preferences.remove(SYMBOL)
+            preferences.remove(WIN_COUNT)
+            preferences.remove(IN_GAME)
         }
     }
 

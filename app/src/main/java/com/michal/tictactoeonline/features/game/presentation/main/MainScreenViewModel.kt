@@ -14,6 +14,8 @@ import com.michal.tictactoeonline.features.signing.data.PlayersDBRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -26,55 +28,38 @@ class MainScreenViewModel(
 
     init {
         viewModelScope.launch {
-            playerRepository.currentPlayer.collect { localPlayer ->
-                _playerState.update { state ->
-                    state.copy(
-                        username = localPlayer.username,
-                        password = localPlayer.password,
-                        uid = localPlayer.uid,
-                        winAmount = localPlayer.winAmount,
-                        inGame = localPlayer.inGame,
-                        symbol = localPlayer.symbol,
-                    )
-                }
+            playerRepository.currentPlayer
+                .flatMapLatest { localPlayer ->
+                playersDBRepository.observePlayer(localPlayer.uid)
+                    .map { remoteData -> localPlayer to remoteData }
             }
-            playerRepository.currentPlayer.collect { localPlayer ->
-                playersDBRepository.observePlayer(localPlayer.uid).collect { snapshot ->
-                    when (snapshot) {
+                .collect { (localPlayer, remoteData) ->
+                    when (remoteData) {
                         is Resource.Error -> println("blad")
                         is Resource.Loading -> println("ladowanie")
                         is Resource.Success -> {
-                            if (snapshot.data != null) {
-                                val newPlayer = Player(
-                                    username = snapshot.data.username,
-                                    password = snapshot.data.password,
-                                    uid = snapshot.data.uid,
-                                    winAmount = snapshot.data.winAmount,
-                                    inGame = snapshot.data.inGame,
-                                    symbol = snapshot.data.symbol,
+                            val remotePlayer = remoteData.data ?: return@collect
+                            _playerState.update { state ->
+                                state.copy(
+                                    username = remotePlayer.username,
+                                    password = remotePlayer.password,
+                                    uid = remotePlayer.uid,
+                                    winAmount = remotePlayer.winAmount,
+                                    inGame = remotePlayer.inGame,
+                                    symbol = remotePlayer.symbol,
                                 )
-                                _playerState.update { state ->
-                                    state.copy(
-                                        username = newPlayer.username,
-                                        password = newPlayer.password,
-                                        uid = newPlayer.uid,
-                                        winAmount = newPlayer.winAmount,
-                                        inGame = newPlayer.inGame,
-                                        symbol = newPlayer.symbol,
-                                    )
+                            }
+                            if(remotePlayer != localPlayer) {
+                                    playerRepository.saveUsername(remotePlayer.username)
+                                    playerRepository.savePassword(remotePlayer.password!!)
+                                    playerRepository.saveUID(remotePlayer.uid)
+                                    playerRepository.saveInGame(remotePlayer.inGame)
+                                    playerRepository.saveWinCount(remotePlayer.winAmount)
+                                    playerRepository.saveSymbol(remotePlayer.symbol!!)
                                 }
-                                playerRepository.saveUsername(newPlayer.username)
-                                playerRepository.savePassword(newPlayer.password!!)
-                                playerRepository.saveUID(newPlayer.uid)
-                                playerRepository.saveInGame(newPlayer.inGame)
-                                playerRepository.saveWinCount(newPlayer.winAmount)
-                                playerRepository.saveSymbol(newPlayer.symbol!!)
                             }
                         }
-
-                    }
                 }
-            }
         }
     }
 
