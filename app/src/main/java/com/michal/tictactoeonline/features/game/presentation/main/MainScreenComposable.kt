@@ -196,13 +196,15 @@ fun MainScreenComposable(
                         modifier = Modifier.fillMaxWidth(0.8f),
                         shape = MaterialTheme.shapes.small
                     ) {
-                        Text(
-                            text = playerState.value.blockedGamesMessage.value,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(4.dp)
-                        )
+                        playerState.value.blockedGamesMessage?.let{ msg ->
+                            Text(
+                                text = "$msg",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(4.dp)
+                            )
+                        }
                     }
                 }
                 FlowRow(horizontalArrangement = Arrangement.Center, verticalArrangement = Arrangement.spacedBy(16.dp), maxItemsInEachRow = 2) {

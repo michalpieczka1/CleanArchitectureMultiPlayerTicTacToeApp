@@ -339,16 +339,16 @@ class OnlineGameViewModel(
                         )
                     }
                 }
-                updateSession()
                 if (uiState.value.session.winner == playerRepository.currentPlayer.first()) {
-                    updatePlayerWinCount()
+                    updatePlayerWinCount() //TODO fix
                 }
+                updateSession()
 
                 onGoBackNavigation()
 
                 playerRepository.saveInGame(false)
 
-                playersDBRepository.updatePlayer(playerRepository.currentPlayer.first())
+                playersDBRepository.updatePlayer(playerRepository.currentPlayer.first().copy(blockedGamesMessage = null))
 
 
                 if (uiState.value.session.playerCount == 0) {

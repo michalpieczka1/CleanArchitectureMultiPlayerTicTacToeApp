@@ -65,7 +65,7 @@ import kotlinx.coroutines.flow.map
     suspend fun doesPlayerExist(): Boolean {
         return dataStore.data.map { preferences ->
             listOf(USERNAME, PASSWORD, UID).all { key ->
-                preferences.contains(key) || preferences[key]?.isNotEmpty() ?: false
+                preferences.contains(key) && preferences[key]?.isNotEmpty() ?: false
             }
         }.firstOrNull() ?: false
     }

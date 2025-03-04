@@ -13,7 +13,7 @@ data class Player(
     val symbol: String? = "X",
     val winAmount: Int = 0,
     val onlineGamesBlocked: Boolean = false,
-    val blockedGamesMessage: BlockedGamesMessages = BlockedGamesMessages.PLAYER_PLAYING,
+    val blockedGamesMessage: BlockedGamesMessages? = null,
 ){
     @Exclude
     fun toMap(): Map<String,Any?>{

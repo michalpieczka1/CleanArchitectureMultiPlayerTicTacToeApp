@@ -49,7 +49,7 @@ class MainScreenViewModel(
                         is Resource.Loading -> println("ladowanie")
                         is Resource.Success -> {
                             val remotePlayer = remoteData.data ?: return@collect
-                    Log.i("wartosc","remote player: $remotePlayer")
+                            Log.i("wartosc","remote player: $remotePlayer")
                             _playerState.update { state ->
                                 state.copy(
                                     username = remotePlayer.username,
